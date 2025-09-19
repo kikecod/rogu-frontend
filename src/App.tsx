@@ -13,6 +13,10 @@ import ClientDashboard from "./pages/dashboard/ClientDashboard";
 import ClientReservations from "./pages/dashboard/ClientReservations";
 import VenueDetail from "./pages/venues/VenueDetail";
 import NotFound from "./pages/NotFound";
+import About from "./pages/About";
+import Contact from "./pages/Contact";
+import Terms from "./pages/Terms";
+import Privacy from "./pages/Privacy";
 
 const queryClient = new QueryClient();
 
@@ -42,6 +46,10 @@ const App = () => (
           <Route path="/" element={<Layout />}>
             <Route index element={<Index />} />
             <Route path="venues" element={<VenueList />} />
+            <Route path="about" element={<About />} />
+            <Route path="contact" element={<Contact />} />
+            <Route path="terms" element={<Terms />} />
+            <Route path="privacy" element={<Privacy />} />
           </Route>
           
           {/* Auth Routes - No Layout */}
