@@ -41,10 +41,10 @@ const RouterAwareContent = () => {
         <div className="flex justify-between h-16">
           <div className="flex items-center">
             <Link to="/" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
-                <span className="text-primary-foreground font-bold">SC</span>
+              <div className="w-10 h-10 bg-gradient-primary rounded-xl flex items-center justify-center shadow-glow">
+                <span className="text-primary-foreground font-display font-bold text-lg">R</span>
               </div>
-              <span className="font-bold text-xl text-primary">SportsCourt</span>
+              <span className="font-display font-bold text-2xl text-primary">ROGÜ</span>
             </Link>
           </div>
 
@@ -52,14 +52,16 @@ const RouterAwareContent = () => {
             {isAuthenticated ? (
               <>
                 <Link to="/venues">
-                  <Button variant="ghost">Canchas</Button>
+                  <Button variant="ghost" className="font-medium hover:bg-primary/10 rounded-lg">
+                    Canchas
+                  </Button>
                 </Link>
                 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                      <Avatar className="h-8 w-8">
-                        <AvatarFallback className="bg-primary text-primary-foreground">
+                    <Button variant="ghost" className="relative h-10 w-10 rounded-xl">
+                      <Avatar className="h-10 w-10">
+                        <AvatarFallback className="bg-gradient-primary text-primary-foreground font-semibold">
                           {user?.name?.charAt(0).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
@@ -86,10 +88,14 @@ const RouterAwareContent = () => {
             ) : (
               <div className="flex items-center space-x-2">
                 <Link to="/auth/login">
-                  <Button variant="ghost">Iniciar Sesión</Button>
+                  <Button variant="ghost" className="font-medium hover:bg-primary/10 rounded-lg">
+                    Iniciar Sesión
+                  </Button>
                 </Link>
                 <Link to="/auth/register">
-                  <Button>Registrarse</Button>
+                  <Button className="bg-gradient-primary hover:opacity-90 rounded-lg font-semibold shadow-glow">
+                    Registrarse
+                  </Button>
                 </Link>
               </div>
             )}
@@ -110,10 +116,10 @@ const FallbackNavbar = () => {
         <div className="flex justify-between h-16">
           <div className="flex items-center">
             <a href="/" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
-                <span className="text-primary-foreground font-bold">SC</span>
+              <div className="w-10 h-10 bg-gradient-primary rounded-xl flex items-center justify-center shadow-glow">
+                <span className="text-primary-foreground font-display font-bold text-lg">R</span>
               </div>
-              <span className="font-bold text-xl text-primary">SportsCourt</span>
+              <span className="font-display font-bold text-2xl text-primary">ROGÜ</span>
             </a>
           </div>
 
@@ -121,10 +127,14 @@ const FallbackNavbar = () => {
             {!isAuthenticated && (
               <div className="flex items-center space-x-2">
                 <a href="/auth/login">
-                  <Button variant="ghost">Iniciar Sesión</Button>
+                  <Button variant="ghost" className="font-medium hover:bg-primary/10 rounded-lg">
+                    Iniciar Sesión
+                  </Button>
                 </a>
                 <a href="/auth/register">
-                  <Button>Registrarse</Button>
+                  <Button className="bg-gradient-primary hover:opacity-90 rounded-lg font-semibold shadow-glow">
+                    Registrarse
+                  </Button>
                 </a>
               </div>
             )}

@@ -8,13 +8,13 @@ export const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="col-span-1 md:col-span-2">
             <div className="flex items-center space-x-2 mb-4">
-              <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
-                <span className="text-primary-foreground font-bold">SC</span>
+              <div className="w-10 h-10 bg-gradient-primary rounded-xl flex items-center justify-center shadow-glow">
+                <span className="text-primary-foreground font-display font-bold text-lg">R</span>
               </div>
-              <span className="font-bold text-xl text-primary">SportsCourt</span>
+              <span className="font-display font-bold text-2xl text-primary">ROGÜ</span>
             </div>
-            <p className="text-muted-foreground max-w-md">
-              La plataforma líder para reservar espacios deportivos. 
+            <p className="text-muted-foreground max-w-md text-lg leading-relaxed">
+              ROGÜ es la plataforma líder para reservar espacios deportivos. 
               Conectamos deportistas con las mejores canchas de la ciudad.
             </p>
           </div>
@@ -42,7 +42,7 @@ export const Footer = () => {
         
         <div className="border-t border-border mt-8 pt-8 text-center">
           <p className="text-muted-foreground">
-            © 2024 SportsCourt. Todos los derechos reservados.
+            © 2024 ROGÜ. Todos los derechos reservados.
           </p>
         </div>
       </div>
