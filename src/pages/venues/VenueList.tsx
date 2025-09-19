@@ -5,6 +5,7 @@ import { Button } from '../../components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../components/ui/select';
 import { VenueCard } from '../../components/venues/VenueCard';
 import { useVenueStore } from '../../store/venueStore';
+import { useAuthStore } from '../../store/authStore';
 import { Search, SlidersHorizontal, MapPin } from 'lucide-react';
 import type { SportType } from '../../types';
 
