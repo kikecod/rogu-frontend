@@ -112,35 +112,6 @@ const Index = () => {
           </div>
         </div>
       </section>
-          </h1>
-          <p className="text-xl text-primary-foreground/90 mb-8 max-w-3xl mx-auto">
-            La plataforma más completa para encontrar y reservar espacios deportivos. 
-            Conectamos deportistas con las mejores canchas de la ciudad.
-          </p>
-          
-          {/* Search Bar */}
-          <div className="max-w-2xl mx-auto bg-background/95 backdrop-blur rounded-xl p-6 shadow-sports">
-            <div className="flex flex-col sm:flex-row gap-4">
-              <div className="flex-1">
-                <Input
-                  placeholder="¿Dónde quieres jugar?"
-                  value={searchLocation}
-                  onChange={(e) => setSearchLocation(e.target.value)}
-                  className="h-12 text-lg"
-                />
-              </div>
-              <Button 
-                onClick={() => handleSearch()}
-                size="lg"
-                className="h-12 bg-gradient-primary hover:opacity-90 px-8"
-              >
-                <Search className="w-5 h-5 mr-2" />
-                Buscar
-              </Button>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Sports Section */}
       <section className="py-20 bg-gray-50">
