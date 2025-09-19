@@ -8,62 +8,63 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Modern Sports Reservation System Design Tokens */
+/* Nueva paleta de colores ROGÜ */
 
 @layer base {
   :root {
-    /* Base colors */
-    --background: 0 0% 100%;
-    --foreground: 222 84% 4.9%;
+    /* Base colors - Nueva paleta */
+    --background: 0 0% 98%; /* #f1f2f5 */
+    --foreground: 220 15% 11%; /* #18191f */
 
     --card: 0 0% 100%;
-    --card-foreground: 222 84% 4.9%;
+    --card-foreground: 220 15% 11%; /* #18191f */
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222 84% 4.9%;
+    --popover-foreground: 220 15% 11%; /* #18191f */
 
-    /* Modern primary palette - Inspired by travel/lifestyle brands */
-    --primary: 220 91% 56%; /* Modern vibrant blue */
+    /* Primary - Azul principal */
+    --primary: 225 85% 61%; /* #4f74ea */
     --primary-foreground: 0 0% 98%;
-    --primary-light: 220 91% 65%;
-    --primary-dark: 220 91% 45%;
+    --primary-light: 225 85% 71%; /* #809cf5 */
+    --primary-dark: 225 85% 51%;
 
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 222 84% 4.9%;
+    /* Secondary - Grises */
+    --secondary: 220 12% 85%; /* #d9dbe0 */
+    --secondary-foreground: 220 15% 11%; /* #18191f */
 
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 16% 47%;
+    --muted: 220 12% 85%; /* #d9dbe0 */
+    --muted-foreground: 220 8% 33%; /* #484a56 */
 
-    /* Accent colors - Warm orange for energy */
-    --accent: 25 95% 53%; /* Energetic orange */
+    /* Accent - Violeta */
+    --accent: 245 89% 60%; /* #4438f5 */
     --accent-foreground: 0 0% 98%;
-    --accent-light: 25 95% 63%;
+    --accent-light: 245 89% 70%;
 
     --destructive: 0 84% 60%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 220 91% 56%;
+    --border: 220 12% 78%; /* #bcbec8 */
+    --input: 220 12% 78%; /* #bcbec8 */
+    --ring: 225 85% 61%; /* #4f74ea */
 
     /* Success and status colors */
-    --success: 142 71% 45%; /* Modern green */
-    --warning: 38 92% 50%; /* Warm yellow */
-    --info: 199 89% 48%; /* Cool blue */
+    --success: 142 71% 45%;
+    --warning: 38 92% 50%;
+    --info: 225 85% 61%; /* #4f74ea */
 
-    /* Neutral grays */
-    --gray-50: 210 40% 98%;
-    --gray-100: 210 40% 96%;
-    --gray-200: 214 32% 91%;
-    --gray-300: 213 27% 84%;
-    --gray-400: 215 20% 65%;
-    --gray-500: 215 16% 47%;
-    --gray-600: 215 19% 35%;
-    --gray-700: 215 25% 27%;
-    --gray-800: 217 33% 17%;
-    --gray-900: 222 84% 4.9%;
+    /* Neutral grays - Nueva paleta */
+    --gray-50: 0 0% 98%; /* #f1f2f5 */
+    --gray-100: 220 12% 85%; /* #d9dbe0 */
+    --gray-200: 220 12% 78%; /* #bcbec8 */
+    --gray-300: 220 8% 60%; /* #979baa */
+    --gray-400: 220 8% 60%; /* #979baa */
+    --gray-500: 220 8% 33%; /* #484a56 */
+    --gray-600: 220 8% 33%; /* #484a56 */
+    --gray-700: 220 15% 11%; /* #18191f */
+    --gray-800: 220 15% 11%; /* #18191f */
+    --gray-900: 220 15% 11%; /* #18191f */
 
-    /* Gradients */
+    /* Gradients - Actualizados con nueva paleta */
     --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-light)));
     --gradient-hero: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%);
     --gradient-card: linear-gradient(145deg, hsl(var(--background)) 0%, hsl(var(--gray-50)) 100%);
@@ -79,50 +80,50 @@
 
     /* Sidebar tokens */
     --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-foreground: 220 15% 11%;
+    --sidebar-primary: 225 85% 61%;
     --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 220 91% 56%;
+    --sidebar-accent: 220 12% 85%;
+    --sidebar-accent-foreground: 220 15% 11%;
+    --sidebar-border: 220 12% 78%;
+    --sidebar-ring: 225 85% 61%;
   }
 
   .dark {
-    --background: 222 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: 220 15% 11%; /* #18191f */
+    --foreground: 0 0% 98%; /* #f1f2f5 */
 
-    --card: 222 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 220 15% 11%; /* #18191f */
+    --card-foreground: 0 0% 98%; /* #f1f2f5 */
 
-    --popover: 222 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 220 15% 11%; /* #18191f */
+    --popover-foreground: 0 0% 98%; /* #f1f2f5 */
 
-    --primary: 220 91% 56%;
+    --primary: 225 85% 61%; /* #4f74ea */
     --primary-foreground: 0 0% 98%;
-    --primary-light: 220 91% 65%;
-    --primary-dark: 220 91% 45%;
+    --primary-light: 225 85% 71%; /* #809cf5 */
+    --primary-dark: 225 85% 51%;
 
-    --secondary: 217 33% 17%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 220 8% 33%; /* #484a56 */
+    --secondary-foreground: 0 0% 98%;
 
-    --muted: 217 33% 17%;
-    --muted-foreground: 215 20% 65%;
+    --muted: 220 8% 33%; /* #484a56 */
+    --muted-foreground: 220 8% 60%; /* #979baa */
 
-    --accent: 25 95% 53%;
+    --accent: 245 89% 60%; /* #4438f5 */
     --accent-foreground: 0 0% 98%;
-    --accent-light: 25 95% 63%;
+    --accent-light: 245 89% 70%;
 
     --destructive: 0 63% 31%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 217 33% 17%;
-    --input: 217 33% 17%;
-    --ring: 220 91% 56%;
+    --border: 220 8% 33%; /* #484a56 */
+    --input: 220 8% 33%; /* #484a56 */
+    --ring: 225 85% 61%; /* #4f74ea */
 
     --success: 142 71% 45%;
     --warning: 38 92% 50%;
-    --info: 199 89% 48%;
+    --info: 225 85% 61%; /* #4f74ea */
 
     /* Dark mode gradients */
     --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-light)));
@@ -136,14 +137,14 @@
     --shadow-lg: 0 10px 15px -3px hsl(0 0% 0% / 0.1), 0 4px 6px -4px hsl(0 0% 0% / 0.1);
     --shadow-xl: 0 20px 25px -5px hsl(0 0% 0% / 0.1), 0 8px 10px -6px hsl(0 0% 0% / 0.1);
 
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 220 91% 56%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 220 91% 56%;
+    --sidebar-background: 220 15% 11%;
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-primary: 225 85% 61%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 220 8% 33%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 220 8% 33%;
+    --sidebar-ring: 225 85% 61%;
   }
 }
 
@@ -273,5 +274,32 @@
 
   .card-glass {
     @apply glass rounded-2xl shadow-soft hover:shadow-xl transition-all duration-300;
+  }
+
+  /* Mobile responsive improvements */
+  @media (max-width: 768px) {
+    .mobile-padding {
+      @apply px-4 py-6;
+    }
+    
+    .mobile-text-sm {
+      @apply text-sm;
+    }
+    
+    .mobile-grid-1 {
+      @apply grid-cols-1;
+    }
+    
+    .mobile-gap-4 {
+      @apply gap-4;
+    }
+    
+    .mobile-text-center {
+      @apply text-center;
+    }
+    
+    .mobile-full-width {
+      @apply w-full;
+    }
   }
 }

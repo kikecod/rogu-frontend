@@ -57,6 +57,14 @@ const VenueDetail = () => {
   const { addReservation } = useReservationStore();
   const { user, isAuthenticated } = useAuthStore();
 
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/auth/login');
+      return;
+    }
+  }, [isAuthenticated, navigate]);
+
   // Find the venue
   const venue = venues.find(v => v.id === id);
 
@@ -139,25 +147,29 @@ const VenueDetail = () => {
     }
   };
 
+  if (!isAuthenticated) {
+    return null; // Will redirect in useEffect
+  }
+
   const totalPrice = selectedTimeSlots.length * venue.pricePerHour;
   const canReserve = selectedDate && selectedTimeSlots.length > 0 && participants.length > 0;
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 mobile-padding">
         {/* Header */}
-        <div className="flex items-center space-x-4 mb-8">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 mb-6 sm:mb-8">
           <Button variant="ghost" onClick={() => navigate('/venues')}>
             <ArrowLeft className="w-4 h-4 mr-2" />
             Volver
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-foreground">{venue.name}</h1>
-            <p className="text-muted-foreground">Reserva tu espacio deportivo</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">{venue.name}</h1>
+            <p className="text-muted-foreground text-sm sm:text-base">Reserva tu espacio deportivo</p>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
           {/* Left Column - Venue Info */}
           <div className="lg:col-span-1 space-y-6">
             {/* Venue Images */}
@@ -166,10 +178,10 @@ const VenueDetail = () => {
                 <img 
                   src={venue.images[0]} 
                   alt={venue.name}
-                  className="w-full h-64 object-cover"
+                  className="w-full h-48 sm:h-64 object-cover"
                 />
                 <Badge 
-                  className="absolute top-4 left-4 text-white font-medium"
+                  className="absolute top-3 left-3 sm:top-4 sm:left-4 text-white font-medium text-xs sm:text-sm"
                   style={{ backgroundColor: sportColors[venue.sport] }}
                 >
                   {sportLabels[venue.sport]}
@@ -180,28 +192,28 @@ const VenueDetail = () => {
             {/* Venue Details */}
             <Card className="border-border">
               <CardHeader>
-                <CardTitle className="flex items-center justify-between">
+                <CardTitle className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
                   <span>{venue.name}</span>
                   <div className="flex items-center space-x-1">
                     <Star className="w-4 h-4 fill-warning text-warning" />
-                    <span className="font-medium">{venue.rating}</span>
-                    <span className="text-sm text-muted-foreground">({venue.totalReviews})</span>
+                    <span className="text-sm sm:text-base font-medium">{venue.rating}</span>
+                    <span className="text-xs sm:text-sm text-muted-foreground">({venue.totalReviews})</span>
                   </div>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-3 sm:space-y-4">
                 <div className="flex items-center text-muted-foreground">
                   <MapPin className="w-4 h-4 mr-2" />
-                  <span>{venue.location}</span>
+                  <span className="text-sm sm:text-base">{venue.location}</span>
                 </div>
 
-                <p className="text-muted-foreground">{venue.description}</p>
+                <p className="text-muted-foreground text-sm sm:text-base">{venue.description}</p>
 
                 <div>
-                  <h4 className="font-medium text-foreground mb-2">Servicios disponibles:</h4>
-                  <div className="flex flex-wrap gap-2">
+                  <h4 className="font-medium text-foreground mb-2 text-sm sm:text-base">Servicios disponibles:</h4>
+                  <div className="flex flex-wrap gap-1 sm:gap-2">
                     {venue.amenities.map((amenity, index) => (
-                      <Badge key={index} variant="outline" className="flex items-center space-x-1">
+                      <Badge key={index} variant="outline" className="flex items-center space-x-1 text-xs">
                         {amenityIcons[amenity] || <CheckCircle className="w-4 h-4" />}
                         <span>{amenity}</span>
                       </Badge>
@@ -209,12 +221,12 @@ const VenueDetail = () => {
                   </div>
                 </div>
 
-                <div className="bg-primary/5 p-4 rounded-lg">
-                  <h4 className="font-medium text-foreground mb-2">Precio por hora:</h4>
-                  <p className="text-2xl font-bold text-primary">
+                <div className="bg-primary/5 p-3 sm:p-4 rounded-lg">
+                  <h4 className="font-medium text-foreground mb-2 text-sm sm:text-base">Precio por hora:</h4>
+                  <p className="text-xl sm:text-2xl font-bold text-primary">
                     ${venue.pricePerHour.toLocaleString()}
                   </p>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-xs sm:text-sm text-muted-foreground">
                     Horarios: {venue.workingHours.start} - {venue.workingHours.end}
                   </p>
                 </div>
@@ -223,22 +235,22 @@ const VenueDetail = () => {
           </div>
 
           {/* Right Column - Reservation Form */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-4 sm:space-y-6">
             {/* Date Selection */}
             <Card className="border-border">
               <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
+                <CardTitle className="flex items-center space-x-2 text-lg sm:text-xl">
                   <CalendarIcon className="w-5 h-5 text-primary" />
                   <span>Selecciona la fecha</span>
                 </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-4 sm:p-6">
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
                       className={cn(
-                        "w-full justify-start text-left font-normal",
+                        "w-full justify-start text-left font-normal h-10 sm:h-auto text-sm sm:text-base",
                         !selectedDate && "text-muted-foreground"
                       )}
                     >
@@ -294,18 +306,18 @@ const VenueDetail = () => {
             {/* Confirm Reservation Button */}
             {totalPrice > 0 && (
               <Card className="border-primary bg-primary/5">
-                <CardContent className="p-6">
+                <CardContent className="p-4 sm:p-6">
                   <div className="flex items-center justify-between mb-4">
                     <div>
-                      <h3 className="text-lg font-semibold text-foreground">
+                      <h3 className="text-base sm:text-lg font-semibold text-foreground">
                         Resumen de la reserva
                       </h3>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-xs sm:text-sm text-muted-foreground">
                         {selectedDate && format(selectedDate, "d 'de' MMMM", { locale: es })} • {selectedTimeSlots.length} hora{selectedTimeSlots.length !== 1 ? 's' : ''} • {participants.length} participante{participants.length !== 1 ? 's' : ''}
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="text-2xl font-bold text-primary">
+                      <p className="text-xl sm:text-2xl font-bold text-primary">
                         ${totalPrice.toLocaleString()}
                       </p>
                     </div>
@@ -314,14 +326,14 @@ const VenueDetail = () => {
                   <Button 
                     onClick={handleReservation}
                     disabled={!canReserve || isSubmitting}
-                    className="w-full bg-gradient-primary hover:opacity-90"
+                    className="w-full bg-gradient-primary hover:opacity-90 h-12 sm:h-auto text-base sm:text-lg"
                     size="lg"
                   >
                     {isSubmitting ? 'Procesando...' : 'Confirmar Reserva'}
                   </Button>
 
                   {!isAuthenticated && (
-                    <p className="text-xs text-muted-foreground mt-2 text-center">
+                    <p className="text-xs text-muted-foreground mt-2 text-center mobile-text-sm">
                       Serás redirigido para iniciar sesión
                     </p>
                   )}

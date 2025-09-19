@@ -7,6 +7,7 @@ interface VenueState {
   selectedSport: SportType | null;
   selectedLocation: string;
   setFilter: (sport: SportType | null, location?: string) => void;
+  setSelectedSport: (sport: SportType | null) => void;
   addVenue: (venue: Omit<Venue, 'id'>) => void;
   updateVenue: (id: string, venue: Partial<Venue>) => void;
   deleteVenue: (id: string) => void;
@@ -100,6 +101,21 @@ export const useVenueStore = create<VenueState>()((set, get) => ({
       filteredVenues: filtered, 
       selectedSport: sport, 
       selectedLocation: location 
+    });
+  },
+
+  setSelectedSport: (sport: SportType | null) => {
+    const { venues } = get();
+    let filtered = venues;
+
+    if (sport) {
+      filtered = filtered.filter(venue => venue.sport === sport);
+    }
+
+    set({ 
+      filteredVenues: filtered, 
+      selectedSport: sport, 
+      selectedLocation: '' 
     });
   },
 
