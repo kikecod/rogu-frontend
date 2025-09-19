@@ -164,7 +164,7 @@ const Index = () => {
       </section>
 
       {/* About Section */}
-      <section className="py-12 sm:py-20">
+      <section id="about" className="py-12 sm:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mobile-padding">
           <div className="text-center mb-20 animate-fade-in">
             <div className="inline-flex items-center gap-2 bg-accent/10 rounded-full px-3 py-2 mb-4 sm:mb-6 text-xs sm:text-sm">
@@ -174,12 +174,12 @@ const Index = () => {
               </span>
             </div>
             <h2 className="text-2xl sm:text-4xl lg:text-5xl font-display font-bold text-foreground mb-4 sm:mb-6 text-balance">
-              ¿Quiénes somos?
+              Conoce ROGÜ
             </h2>
             <p className="text-muted-foreground text-base sm:text-xl max-w-4xl mx-auto text-balance">
-              ROGÜ es la plataforma líder en reservas de espacios deportivos. 
-              Conectamos deportistas apasionados con propietarios de canchas, 
-              facilitando el acceso al deporte para todos.
+              Somos la plataforma líder en reservas de espacios deportivos en Latinoamérica. 
+              Nuestra misión es democratizar el acceso al deporte, conectando deportistas apasionados 
+              con las mejores canchas de la ciudad de manera fácil, rápida y segura.
             </p>
           </div>
 
@@ -190,11 +190,11 @@ const Index = () => {
                   <Shield className="w-8 h-8 text-primary-foreground" />
                 </div>
                 <h3 className="text-xl sm:text-2xl font-bold text-foreground mb-4">
-                  Seguro y Confiable
+                  100% Seguro
                 </h3>
                 <p className="text-muted-foreground text-base sm:text-lg leading-relaxed">
-                  Verificamos todas las canchas y propietarios para garantizar 
-                  una experiencia segura y confiable para nuestros usuarios.
+                  Todas nuestras transacciones son seguras y verificamos cada cancha 
+                  para garantizar la mejor experiencia deportiva. Tu información está protegida.
                 </p>
               </CardContent>
             </Card>
@@ -205,11 +205,11 @@ const Index = () => {
                   <Clock className="w-8 h-8 text-primary-foreground" />
                 </div>
                 <h3 className="text-xl sm:text-2xl font-bold text-foreground mb-4">
-                  Reserva Instantánea
+                  Reserva en Segundos
                 </h3>
                 <p className="text-muted-foreground text-base sm:text-lg leading-relaxed">
-                  Reserva tu cancha en tiempo real, selecciona horarios 
-                  disponibles y recibe confirmación inmediata.
+                  Nuestra plataforma intuitiva te permite encontrar y reservar 
+                  la cancha perfecta en segundos. Confirmación instantánea garantizada.
                 </p>
               </CardContent>
             </Card>
@@ -220,14 +220,46 @@ const Index = () => {
                   <Users className="w-8 h-8 text-primary-foreground" />
                 </div>
                 <h3 className="text-xl sm:text-2xl font-bold text-foreground mb-4">
-                  Comunidad Activa
+                  Miles de Usuarios
                 </h3>
                 <p className="text-muted-foreground text-base sm:text-lg leading-relaxed">
-                  Únete a miles de deportistas que ya confían en nosotros 
-                  para encontrar las mejores canchas.
+                  Más de 10,000 deportistas ya confían en ROGÜ. Únete a la comunidad 
+                  deportiva más grande y activa de la región.
                 </p>
               </CardContent>
             </Card>
+          </div>
+          
+          {/* Stats Section */}
+          <div className="mt-20">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+              <div className="animate-scale-in">
+                <div className="text-3xl sm:text-4xl font-bold text-primary mb-2">500+</div>
+                <div className="text-muted-foreground">Canchas Disponibles</div>
+              </div>
+              <div className="animate-scale-in delay-100">
+                <div className="text-3xl sm:text-4xl font-bold text-primary mb-2">10K+</div>
+                <div className="text-muted-foreground">Usuarios Activos</div>
+              </div>
+              <div className="animate-scale-in delay-200">
+                <div className="text-3xl sm:text-4xl font-bold text-primary mb-2">50K+</div>
+                <div className="text-muted-foreground">Reservas Realizadas</div>
+              </div>
+              <div className="animate-scale-in delay-300">
+                <div className="text-3xl sm:text-4xl font-bold text-primary mb-2">4.8★</div>
+                <div className="text-muted-foreground">Calificación Promedio</div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Learn More Button */}
+          <div className="text-center mt-16">
+            <Link to="/about">
+              <Button variant="outline" size="lg" className="group">
+                Conoce más sobre nosotros
+                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
