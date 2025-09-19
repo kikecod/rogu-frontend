@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/ca
 import { Button } from '../../components/ui/button';
 import { Badge } from '../../components/ui/badge';
 import { Dialog, DialogContent, DialogTrigger } from '../../components/ui/dialog';
+import { DialogTitle } from '../../components/ui/dialog';
 import { QRCodeDisplay } from '../../components/qr/QRCodeDisplay';
 import { Calendar, Clock, MapPin, Users, QrCode, X } from 'lucide-react';
 import { useReservationStore } from '../../store/reservationStore';
@@ -123,6 +124,7 @@ export const ReservationCard: React.FC<ReservationCardProps> = ({ reservation })
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="max-w-lg">
+                  <DialogTitle>Código QR - {venueName}</DialogTitle>
                   <QRCodeDisplay reservation={reservation} venueName={venueName} />
                 </DialogContent>
               </Dialog>
