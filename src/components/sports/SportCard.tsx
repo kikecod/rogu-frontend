@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, CardContent } from '@/components/ui/card';
-import { useVenueStore } from '@/store/venueStore';
+import { Card, CardContent } from '../ui/card';
+import { useVenueStore } from '../../store/venueStore';
 
 interface SportCardProps {
   sport: string;
