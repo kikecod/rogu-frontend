@@ -8,151 +8,146 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Nueva paleta de colores basada en la especificación */
+/* =========================================================
+   PALETA BASE (HSL) + soporte opcional OKLCH (fallback HSL)
+   Tailwind lee estos tokens como: hsl(var(--token))
+   ========================================================= */
 
 @layer base {
   :root {
-    /* Escala de grises (Fila 1) */
-    --background: 241 242 245; /* #f1f2f5 - casi blanco */
-    --foreground: 24 25 31; /* #18191f - negro muy oscuro */
+    /* --------- Base / Grises --------- */
+    
+    --foreground: 231 13% 11%;      /* #18191f */
 
-    --card: 255 255 255; /* #ffffff - blanco puro para cards */
-    --card-foreground: 24 25 31; /* #18191f */
+    --card: 0 0% 100%;              /* #ffffff */
+    --card-foreground: 231 13% 11%;
 
-    --popover: 255 255 255; /* #ffffff */
-    --popover-foreground: 24 25 31; /* #18191f */
+    --popover: 0 0% 100%;
+    --popover-foreground: 231 13% 11%;
 
-    /* Primary - Azul medio (Fila 2) */
-    --primary: 79 116 234; /* #4f74ea - azul medio */
-    --primary-foreground: 255 255 255; /* #ffffff */
-    --primary-light: 128 156 245; /* #809cf5 - azul claro */
-    --primary-dark: 68 56 245; /* #4438f5 - violeta intenso para contraste */
+    /* --------- Marca (Azules/Violetas) --------- */
+    /* HSL (fallback universal) */
+    --primary: 226 79% 61%;         /* #4f74ea */
+    --primary-foreground: 0 0% 100%;
+    --primary-light: 226 85% 73%;   /* #809cf5 */
+    --primary-dark: 244 90% 59%;    /* #4438f5 */
 
-    /* Secondary - Grises medios */
-    --secondary: 217 219 224; /* #d9dbe0 - gris muy claro */
-    --secondary-foreground: 24 25 31; /* #18191f */
+    --accent: 244 90% 59%;          /* #4438f5 */
+    --accent-foreground: 0 0% 100%;
+    --accent-light: 244 89% 86%;    /* #bebafb */
 
-    --muted: 217 219 224; /* #d9dbe0 - gris muy claro */
-    --muted-foreground: 72 74 86; /* #484a56 - gris oscuro */
+    /* OKLCH (opcional, sólo si el navegador soporta) */
+    /* Si quieres usar OKLCH para primary en algunos componentes:
+       background: var(--primary-oklch-color, hsl(var(--primary)));
+       donde --primary-oklch-color se define más abajo en @supports */
+    --primary-oklch: 58.5% 0.233 277.117; /* morado/azulado vibrante */
 
-    /* Accent - Violeta (Fila 3) */
-    --accent: 68 56 245; /* #4438f5 - violeta intenso */
-    --accent-foreground: 255 255 255; /* #ffffff */
-    --accent-light: 190 186 251; /* #bebafb - violeta claro */
+    /* --------- Auxiliares --------- */
+    --secondary: 223 10% 86%;       /* #d9dbe0 */
+    --secondary-foreground: 231 13% 11%;
 
-    --destructive: 239 68 68; /* #ef4444 - mantenemos rojo para destructive */
-    --destructive-foreground: 255 255 255; /* #ffffff */
+    --muted: 223 10% 86%;           /* #d9dbe0 */
+    --muted-foreground: 231 9% 31%; /* #484a56 */
 
-    --border: 188 190 200; /* #bcbec8 - gris claro */
-    --input: 188 190 200; /* #bcbec8 - gris claro */
-    --ring: 79 116 234; /* #4f74ea - azul medio */
+    --destructive: 0 84% 60%;       /* #ef4444 */
+    --destructive-foreground: 0 0% 100%;
 
-    /* Success and status colors */
-    --success: 34 197 94; /* #22c55e - mantenemos verde para success */
-    --warning: 245 158 11; /* #f59e0b - mantenemos naranja para warning */
-    --info: 79 116 234; /* #4f74ea - azul medio */
+    --border: 230 10% 76%;          /* #bcbec8 */
+    --input: 230 10% 76%;
+    --ring: 226 79% 61%;
 
-    /* Escala de grises actualizada */
-    --gray-50: 241 242 245; /* #f1f2f5 - casi blanco */
-    --gray-100: 217 219 224; /* #d9dbe0 - gris muy claro */
-    --gray-200: 188 190 200; /* #bcbec8 - gris claro */
-    --gray-300: 151 155 170; /* #979baa - gris medio */
-    --gray-400: 151 155 170; /* #979baa - gris medio */
-    --gray-500: 72 74 86; /* #484a56 - gris oscuro */
-    --gray-600: 72 74 86; /* #484a56 - gris oscuro */
-    --gray-700: 24 25 31; /* #18191f - negro muy oscuro */
-    --gray-800: 24 25 31; /* #18191f - negro muy oscuro */
-    --gray-900: 24 25 31; /* #18191f - negro muy oscuro */
+    /* --------- Estados --------- */
+    --success: 142 71% 45%;         /* #22c55e */
+    --warning: 244 89% 86%;         /* #bebafb (sin amarillos) */
+    --info: 226 79% 61%;            /* #4f74ea */
 
-    /* Gradientes actualizados */
-    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
-    --gradient-hero: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%);
-    --gradient-card: linear-gradient(145deg, hsl(var(--background)) 0%, hsl(var(--gray-50)) 100%);
+    /* --------- Escala de grises utilitaria --------- */
+    --gray-50: 225 17% 95%;         /* #f1f2f5 */
+    --gray-100: 223 10% 86%;        /* #d9dbe0 */
+    --gray-200: 230 10% 76%;        /* #bcbec8 */
+    --gray-300: 227 10% 63%;        /* #979baa */
+    --gray-400: 227 10% 63%;
+    --gray-500: 231 9% 31%;         /* #484a56 */
+    --gray-600: 231 9% 31%;
+    --gray-700: 231 13% 11%;        /* #18191f */
+    --gray-800: 231 13% 11%;
+    --gray-900: 231 13% 11%;
 
-    /* Shadows mejoradas */
-    --shadow-sm: 0 1px 2px 0 rgb(24 25 31 / 0.05);
-    --shadow: 0 1px 3px 0 rgb(24 25 31 / 0.1), 0 1px 2px -1px rgb(24 25 31 / 0.1);
-    --shadow-md: 0 4px 6px -1px rgb(24 25 31 / 0.1), 0 2px 4px -2px rgb(24 25 31 / 0.1);
-    --shadow-lg: 0 10px 15px -3px rgb(24 25 31 / 0.1), 0 4px 6px -4px rgb(24 25 31 / 0.1);
-    --shadow-xl: 0 20px 25px -5px rgb(24 25 31 / 0.1), 0 8px 10px -6px rgb(24 25 31 / 0.1);
-    --shadow-2xl: 0 25px 50px -12px rgb(24 25 31 / 0.25);
-
-    --radius: 0.75rem;
-
-    /* Sidebar tokens */
-    --sidebar-background: 255 255 255;
-    --sidebar-foreground: 24 25 31;
-    --sidebar-primary: 79 116 234;
-    --sidebar-primary-foreground: 255 255 255;
-    --sidebar-accent: 217 219 224;
-    --sidebar-accent-foreground: 24 25 31;
-    --sidebar-border: 188 190 200;
-    --sidebar-ring: 79 116 234;
-
-    /* Colores deportivos actualizados */
-    --sports-soccer: 34 197 94; /* Verde - mantenemos */
-    --sports-basketball: 245 158 11; /* Naranja - mantenemos */
-    --sports-tennis: 239 68 68; /* Rojo - mantenemos */
-    --sports-volleyball: 68 56 245; /* #4438f5 - violeta intenso */
+    /* --------- Sidebar --------- */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 231 13% 11%;
+    --sidebar-primary: 226 79% 61%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 223 10% 86%;
+    --sidebar-accent-foreground: 231 13% 11%;
+    --sidebar-border: 230 10% 76%;
+    --sidebar-ring: 226 79% 61%;
   }
 
+  /* Soporte opcional OKLCH:
+     Define un alias listo para usar en propiedades (no en Tailwind tokens).
+     Úsalo así en CSS/inline:
+       background: var(--primary-oklch-color, hsl(var(--primary)));
+  */
+  @supports (color: oklch(50% 0.2 300)) {
+    :root {
+      --primary-oklch-color: oklch(var(--primary-oklch));
+    }
+  }
+
+  /* =================== DARK MODE =================== */
   .dark {
-    --background: 24 25 31; /* #18191f - negro muy oscuro */
-    --foreground: 241 242 245; /* #f1f2f5 - casi blanco */
+    --background: 231 13% 11%;      /* #18191f */
+    --foreground: 225 17% 95%;      /* #f1f2f5 */
 
-    --card: 72 74 86; /* #484a56 - gris oscuro */
-    --card-foreground: 241 242 245; /* #f1f2f5 */
+    --card: 231 9% 31%;             /* #484a56 */
+    --card-foreground: 225 17% 95%;
 
-    --popover: 72 74 86; /* #484a56 */
-    --popover-foreground: 241 242 245; /* #f1f2f5 */
+    --popover: 231 9% 31%;
+    --popover-foreground: 225 17% 95%;
 
-    --primary: 128 156 245; /* #809cf5 - azul claro para dark mode */
-    --primary-foreground: 24 25 31; /* #18191f */
-    --primary-light: 194 207 247; /* #c2cff7 - azul muy claro */
-    --primary-dark: 79 116 234; /* #4f74ea */
+    --primary: 226 85% 73%;         /* #809cf5 */
+    --primary-foreground: 231 13% 11%;
+    --primary-light: 225 77% 86%;   /* #c2cff7 */
+    --primary-dark: 226 79% 61%;    /* #4f74ea */
 
-    --secondary: 72 74 86; /* #484a56 - gris oscuro */
-    --secondary-foreground: 241 242 245; /* #f1f2f5 */
+    --secondary: 231 9% 31%;
+    --secondary-foreground: 225 17% 95%;
 
-    --muted: 72 74 86; /* #484a56 */
-    --muted-foreground: 151 155 170; /* #979baa - gris medio */
+    --muted: 231 9% 31%;
+    --muted-foreground: 227 10% 63%;/* #979baa */
 
-    --accent: 190 186 251; /* #bebafb - violeta claro para dark mode */
-    --accent-foreground: 24 25 31; /* #18191f */
-    --accent-light: 187 182 248; /* #bbb6f8 - violeta muy claro */
+    --accent: 244 89% 86%;          /* #bebafb */
+    --accent-foreground: 231 13% 11%;
+    --accent-light: 245 83% 84%;    /* #bbb6f8 */
 
-    --destructive: 239 68 68; /* #ef4444 */
-    --destructive-foreground: 241 242 245; /* #f1f2f5 */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 225 17% 95%;
 
-    --border: 72 74 86; /* #484a56 - gris oscuro */
-    --input: 72 74 86; /* #484a56 */
-    --ring: 128 156 245; /* #809cf5 - azul claro */
+    --border: 231 9% 31%;
+    --input: 231 9% 31%;
+    --ring: 226 85% 73%;
 
-    --success: 34 197 94; /* #22c55e */
-    --warning: 245 158 11; /* #f59e0b */
-    --info: 128 156 245; /* #809cf5 */
+    --success: 142 71% 45%;
+    --warning: 245 83% 84%;
+    --info: 226 85% 73%;
 
-    /* Dark mode gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
-    --gradient-hero: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%);
-    --gradient-card: linear-gradient(145deg, hsl(var(--card)) 0%, hsl(var(--muted)) 100%);
+    --sidebar-background: 231 9% 31%;
+    --sidebar-foreground: 225 17% 95%;
+    --sidebar-primary: 226 85% 73%;
+    --sidebar-primary-foreground: 231 13% 11%;
+    --sidebar-accent: 231 9% 31%;
+    --sidebar-accent-foreground: 225 17% 95%;
+    --sidebar-border: 231 9% 31%;
+    --sidebar-ring: 226 85% 73%;
 
-    /* Dark mode shadows */
-    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
-    --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.4), 0 1px 2px -1px rgb(0 0 0 / 0.4);
-    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.4);
-    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4), 0 4px 6px -4px rgb(0 0 0 / 0.4);
-    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.4), 0 8px 10px -6px rgb(0 0 0 / 0.4);
-    --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.5);
+    --shadow-lg: 0 10px 15px -3px hsl(var(--foreground)/0.08), 0 4px 6px -4px hsl(var(--foreground)/0.06);
+    --shadow-xl: 0 20px 25px -5px hsl(var(--foreground)/0.10), 0 10px 10px -5px hsl(var(--foreground)/0.08);
 
-    --sidebar-background: 72 74 86;
-    --sidebar-foreground: 241 242 245;
-    --sidebar-primary: 128 156 245;
-    --sidebar-primary-foreground: 24 25 31;
-    --sidebar-accent: 72 74 86;
-    --sidebar-accent-foreground: 241 242 245;
-    --sidebar-border: 72 74 86;
-    --sidebar-ring: 128 156 245;
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%);
+    --gradient-hero: radial-gradient(120% 120% at 0% 0%, hsl(var(--accent)/0.2), transparent 60%),
+                    linear-gradient(180deg, hsl(var(--primary)/0.15), transparent 40%);
+    --gradient-card: linear-gradient(180deg, hsl(var(--background)), hsl(var(--gray-50)));
   }
 }
 
@@ -188,6 +183,11 @@
     width: 8px;
     height: 8px;
   }
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--gray-300)) hsl(var(--gray-100));
+  }
+
 
   ::-webkit-scrollbar-track {
     background: hsl(var(--gray-100));
@@ -203,12 +203,12 @@
     background: hsl(var(--gray-400));
   }
 
-  /* Focus visible mejorado */
-  *:focus-visible {
+  :where(a,button,input,textarea,select,[role="button"],[tabindex]):focus-visible {
     outline: 2px solid hsl(var(--primary));
     outline-offset: 2px;
-    border-radius: 4px;
-  }
+    border-radius: .375rem;
+  } 
+
 }
 
 /* Custom utility classes mejoradas */
@@ -238,7 +238,11 @@
   }
 
   .bg-gradient-hero {
-    background: var(--gradient-hero);
+    background: linear-gradient(
+      135deg,
+      hsl(var(--primary-light)) 0%,
+      hsl(var(--accent-light)) 100%
+    );
   }
 
   .bg-gradient-card {
@@ -246,12 +250,14 @@
   }
 
   .glass {
+    background-clip: padding-box;
     background: hsl(var(--background) / 0.8);
     backdrop-filter: blur(12px);
     border: 1px solid hsl(var(--border) / 0.5);
   }
 
   .glass-dark {
+    background-clip: padding-box;
     background: hsl(var(--background) / 0.1);
     backdrop-filter: blur(12px);
     border: 1px solid hsl(var(--border) / 0.2);
@@ -526,6 +532,7 @@
   background: linear-gradient(90deg, hsl(var(--gray-200)) 25%, hsl(var(--gray-100)) 50%, hsl(var(--gray-200)) 75%);
   background-size: 200% 100%;
   animation: loading 1.5s infinite;
+  border-radius: inherit;
 }
 
 @keyframes loading {
@@ -551,10 +558,11 @@
 /* Alto contraste */
 @media (prefers-contrast: high) {
   :root {
-    --border: 24 25 31;
-    --ring: 24 25 31;
+    --border: 231 13% 11%;
+    --ring: 231 13% 11%;
   }
 }
+
 
 /* Modo oscuro preferido */
 @media (prefers-color-scheme: dark) {

@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Button } from '../ui/button';
-import { useAuthStore } from '../../store/authStore';
-import { 
-  LogOut, 
-  User, 
-  Calendar, 
-  Settings, 
-  Menu, 
-  X, 
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { NavLink, Link, useLocation, useNavigate } from "react-router-dom";
+import { Button } from "../ui/button";
+import { useAuthStore } from "../../store/authStore";
+import {
+  LogOut,
+  User,
+  Calendar,
+  Settings,
+  Menu,
+  X,
   ChevronDown,
   Info,
   Phone,
@@ -16,220 +16,432 @@ import {
   Shield,
   Building,
   QrCode,
-  Users
-} from 'lucide-react';
+  Users,
+  Sun,
+  Moon,
+} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
   DropdownMenuSeparator,
-} from '../ui/dropdown-menu';
-import { Avatar, AvatarFallback } from '../ui/avatar';
+} from "../ui/dropdown-menu";
+import { Avatar, AvatarFallback } from "../ui/avatar";
 
-// Router-aware navigation component
-const RouterAwareContent = () => {
+/* =========================================================
+   NAVBAR MEJORADO – Enfoque en UX, accesibilidad y mantenimiento
+   - Estados de activo con NavLink
+   - Modo oscuro/claro con persistencia
+   - Sombras dinámicas al hacer scroll
+   - Menú móvil con cierre por ESC y al navegar
+   - Menú de usuario por rol (reutilizable)
+   - "Skip to content" y mejores ARIA labels
+   ========================================================= */
+
+// --- Utilidades UI ---
+const cx = (...cls: Array<string | false | null | undefined>) =>
+  cls.filter(Boolean).join(" ");
+
+const NavLogo = ({ onClick }: { onClick?: () => void }) => (
+  <Link
+    to="/"
+    className="flex items-center space-x-2 group outline-none"
+    onClick={onClick}
+    aria-label="Ir al inicio"
+  >
+    {/* Caja del logo: oscuro en modo claro, gradiente marca en modo oscuro */}
+    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105 bg-gradient-to-tr from-gray-900 to-gray-700 dark:from-[hsl(var(--primary-dark))] dark:to-[hsl(var(--primary))]">
+      {/* Letra siempre blanca para máximo contraste */}
+      <span className="text-white font-bold text-sm sm:text-lg">R</span>
+    </div>
+    {/* Marca: texto sólido en claro para legibilidad; gradiente sólo en oscuro */}
+    <span className="font-bold text-xl sm:text-2xl text-foreground dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-r dark:from-[hsl(var(--primary))] dark:to-[hsl(var(--accent))]">
+      ROGÜ
+    </span>
+  </Link>
+);
+
+// --- Theme Toggle ---
+function useTheme() {
+  const [theme, setTheme] = useState<"light" | "dark">(() => {
+    const stored = localStorage.getItem("theme");
+    if (stored === "dark" || stored === "light") return stored;
+    return window.matchMedia?.("(prefers-color-scheme: dark)").matches
+      ? "dark"
+      : "light";
+  });
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (theme === "dark") root.classList.add("dark");
+    else root.classList.remove("dark");
+    localStorage.setItem("theme", theme);
+  }, [theme]);
+
+  return {
+    theme,
+    toggle: () => setTheme((t) => (t === "dark" ? "light" : "dark")),
+  };
+}
+
+// --- Icono/label según rol ---
+const roleIcon = (role?: string) => {
+  switch (role) {
+    case "owner":
+      return <Building className="w-4 h-4" />;
+    case "controller":
+      return <QrCode className="w-4 h-4" />;
+    case "client":
+      return <User className="w-4 h-4" />;
+    default:
+      return <User className="w-4 h-4" />;
+  }
+};
+
+const roleLabel = (role?: string) => {
+  switch (role) {
+    case "owner":
+      return "Propietario";
+    case "controller":
+      return "Controlador";
+    case "client":
+      return "Cliente";
+    default:
+      return "Usuario";
+  }
+};
+
+// --- Rutas por rol ---
+const roleDashboard = (role?: string) => {
+  switch (role) {
+    case "client":
+      return "/dashboard/client";
+    case "owner":
+      return "/dashboard/owner";
+    case "controller":
+      return "/dashboard/controller";
+    default:
+      return "/";
+  }
+};
+
+// --- Links de menú Empresa (reusables) ---
+const CompanyLinks = ({ onClick }: { onClick?: () => void }) => (
+  <>
+    <DropdownMenuItem asChild className="rounded-lg mx-1 my-1">
+      <Link
+        to="/about"
+        className="flex items-center px-3 py-2 text-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+        onClick={onClick}
+      >
+        <Info className="mr-3 h-4 w-4" />
+        <span>Quiénes Somos</span>
+      </Link>
+    </DropdownMenuItem>
+    <DropdownMenuItem asChild className="rounded-lg mx-1 my-1">
+      <Link
+        to="/contact"
+        className="flex items-center px-3 py-2 text-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+        onClick={onClick}
+      >
+        <Phone className="mr-3 h-4 w-4" />
+        <span>Contacto</span>
+      </Link>
+    </DropdownMenuItem>
+    <DropdownMenuSeparator className="my-2 mx-2" />
+    <DropdownMenuItem asChild className="rounded-lg mx-1 my-1">
+      <Link
+        to="/terms"
+        className="flex items-center px-3 py-2 text-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+        onClick={onClick}
+      >
+        <FileText className="mr-3 h-4 w-4" />
+        <span>Términos</span>
+      </Link>
+    </DropdownMenuItem>
+    <DropdownMenuItem asChild className="rounded-lg mx-1 my-1">
+      <Link
+        to="/privacy"
+        className="flex items-center px-3 py-2 text-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+        onClick={onClick}
+      >
+        <Shield className="mr-3 h-4 w-4" />
+        <span>Privacidad</span>
+      </Link>
+    </DropdownMenuItem>
+  </>
+);
+
+// --- Bloques por rol (desktop + mobile reuso) ---
+function ClientLinks({ onClick }: { onClick?: () => void }) {
+  const items = [
+    {
+      to: "/dashboard/client/reservations",
+      icon: Calendar,
+      label: "Mis Reservas",
+    },
+    { to: "/venues", icon: Users, label: "Buscar Canchas" },
+  ];
+  return (
+    <>
+      {items.map(({ to, icon: Icon, label }) => (
+        <DropdownMenuItem
+          key={to}
+          onClick={onClick}
+          asChild
+          className="rounded-lg mx-1 my-1 px-3 py-2 hover:bg-primary/10 hover:text-primary transition-colors"
+        >
+          <Link to={to} className="flex items-center">
+            <Icon className="mr-3 h-4 w-4" />
+            <span>{label}</span>
+          </Link>
+        </DropdownMenuItem>
+      ))}
+    </>
+  );
+}
+
+function OwnerLinks({ onClick }: { onClick?: () => void }) {
+  const items = [
+    { to: "/dashboard/owner", icon: Building, label: "Mis Canchas" },
+    { to: "/dashboard/owner/reservations", icon: Calendar, label: "Reservas" },
+  ];
+  return (
+    <>
+      {items.map(({ to, icon: Icon, label }) => (
+        <DropdownMenuItem
+          key={to}
+          onClick={onClick}
+          asChild
+          className="rounded-lg mx-1 my-1 px-3 py-2 hover:bg-primary/10 hover:text-primary transition-colors"
+        >
+          <Link to={to} className="flex items-center">
+            <Icon className="mr-3 h-4 w-4" />
+            <span>{label}</span>
+          </Link>
+        </DropdownMenuItem>
+      ))}
+    </>
+  );
+}
+
+function ControllerLinks({ onClick }: { onClick?: () => void }) {
+  const items = [
+    { to: "/dashboard/controller", icon: QrCode, label: "Scanner QR" },
+    {
+      to: "/dashboard/controller/access",
+      icon: Users,
+      label: "Control de Acceso",
+    },
+  ];
+  return (
+    <>
+      {items.map(({ to, icon: Icon, label }) => (
+        <DropdownMenuItem
+          key={to}
+          onClick={onClick}
+          asChild
+          className="rounded-lg mx-1 my-1 px-3 py-2 hover:bg-primary/10 hover:text-primary transition-colors"
+        >
+          <Link to={to} className="flex items-center">
+            <Icon className="mr-3 h-4 w-4" />
+            <span>{label}</span>
+          </Link>
+        </DropdownMenuItem>
+      ))}
+    </>
+  );
+}
+
+// --- Contenido sensible al Router ---
+const RouterAwareContent: React.FC = () => {
   const { user, isAuthenticated, logout } = useAuthStore();
   const navigate = useNavigate();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const location = useLocation();
+  const { theme, toggle } = useTheme();
+
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [elevated, setElevated] = useState(false);
+  const mobileRef = useRef<HTMLDivElement | null>(null);
+
+  // Cerrar menú móvil al navegar
+  useEffect(() => {
+    if (isMobileOpen) setIsMobileOpen(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname]);
+
+  // Cerrar por ESC
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setIsMobileOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  // Sombra dinámica al hacer scroll
+  useEffect(() => {
+    const onScroll = () => setElevated(window.scrollY > 2);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   const handleLogout = () => {
     logout();
-    navigate('/');
-    setIsMobileMenuOpen(false);
+    navigate("/");
   };
 
-  const getDashboardRoute = () => {
-    if (!user) return '/';
-    switch (user.role) {
-      case 'client':
-        return '/dashboard/client';
-      case 'owner':
-        return '/dashboard/owner';
-      case 'controller':
-        return '/dashboard/controller';
-      default:
-        return '/';
-    }
-  };
-
-  const getRoleIcon = () => {
-    if (!user) return <User className="w-4 h-4" />;
-    switch (user.role) {
-      case 'client':
-        return <User className="w-4 h-4" />;
-      case 'owner':
-        return <Building className="w-4 h-4" />;
-      case 'controller':
-        return <QrCode className="w-4 h-4" />;
-      default:
-        return <User className="w-4 h-4" />;
-    }
-  };
-
-  const getRoleLabel = () => {
-    if (!user) return 'Usuario';
-    switch (user.role) {
-      case 'client':
-        return 'Cliente';
-      case 'owner':
-        return 'Propietario';
-      case 'controller':
-        return 'Controlador';
-      default:
-        return 'Usuario';
-    }
-  };
-
-  const closeMobileMenu = () => {
-    setIsMobileMenuOpen(false);
-  };
+  const dashboardRoute = useMemo(() => roleDashboard(user?.role), [user?.role]);
 
   return (
-    <nav className="bg-background/95 backdrop-blur-md border-b border-border sticky top-0 z-50 shadow-sm">
+    <nav
+      className={cx(
+        "bg-background/60 backdrop-blur-md border-b border-border sticky top-0 z-50 transition-shadow duration-300",
+        elevated && "shadow-sm"
+      )}
+      role="navigation"
+      aria-label="Barra de navegación principal"
+    >
+      {/* Skip to content */}
+      <a
+        href="#main"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[60] bg-primary text-primary-foreground px-3 py-2 rounded-md"
+      >
+        Saltar al contenido
+      </a>
+
       <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
         <div className="flex justify-between items-center h-14 sm:h-16">
           {/* Logo */}
           <div className="flex items-center flex-shrink-0">
-            <Link to="/" className="flex items-center space-x-2 group" onClick={closeMobileMenu}>
-              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-primary rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
-                <span className="text-white font-bold text-sm sm:text-lg">R</span>
-              </div>
-              <span className="font-bold text-xl sm:text-2xl bg-gradient-primary bg-clip-text text-transparent">
-                ROGÜ
-              </span>
-            </Link>
+            <NavLogo />
           </div>
 
-          {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center space-x-1">
-            {/* Company Menu */}
+          {/* Desktop Nav */}
+          <div className="hidden lg:flex items-center gap-1">
+            {/* Menú Empresa */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="font-medium text-foreground hover:text-primary hover:bg-primary/10 rounded-lg px-3 py-2 transition-all duration-200">
+                <Button
+                  variant="ghost"
+                  className="font-medium text-foreground hover:text-primary hover:bg-primary/10 rounded-lg px-3 py-2 transition-all"
+                  aria-label="Abrir menú Empresa"
+                >
                   Empresa
                   <ChevronDown className="w-4 h-4 ml-1 transition-transform group-data-[state=open]:rotate-180" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-48 bg-background/95 backdrop-blur-md border border-border shadow-xl rounded-xl" align="start">
-                <DropdownMenuItem asChild className="rounded-lg mx-1 my-1">
-                  <Link to="/about" className="flex items-center px-3 py-2 text-foreground hover:text-primary hover:bg-primary/10 transition-colors">
-                    <Info className="mr-3 h-4 w-4" />
-                    <span>Quiénes Somos</span>
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild className="rounded-lg mx-1 my-1">
-                  <Link to="/contact" className="flex items-center px-3 py-2 text-foreground hover:text-primary hover:bg-primary/10 transition-colors">
-                    <Phone className="mr-3 h-4 w-4" />
-                    <span>Contacto</span>
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator className="my-2 mx-2" />
-                <DropdownMenuItem asChild className="rounded-lg mx-1 my-1">
-                  <Link to="/terms" className="flex items-center px-3 py-2 text-foreground hover:text-primary hover:bg-primary/10 transition-colors">
-                    <FileText className="mr-3 h-4 w-4" />
-                    <span>Términos</span>
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild className="rounded-lg mx-1 my-1">
-                  <Link to="/privacy" className="flex items-center px-3 py-2 text-foreground hover:text-primary hover:bg-primary/10 transition-colors">
-                    <Shield className="mr-3 h-4 w-4" />
-                    <span>Privacidad</span>
-                  </Link>
-                </DropdownMenuItem>
+              <DropdownMenuContent
+                className="w-48 bg-background/95 backdrop-blur-md border border-border shadow-xl rounded-xl"
+                align="start"
+              >
+                <CompanyLinks />
               </DropdownMenuContent>
             </DropdownMenu>
 
+            {/* Link Canchas visible para todos (autenticados lo usan mucho) */}
+            <NavLink
+              to="/venues"
+              className={({ isActive }) =>
+                cx(
+                  "rounded-lg px-3 py-2 font-medium transition-colors",
+                  "hover:text-primary hover:bg-primary/10",
+                  isActive ? "text-primary" : "text-foreground"
+                )
+              }
+            >
+              Canchas
+            </NavLink>
+
+            {/* Theme Toggle */}
+            <Button
+              variant="ghost"
+              aria-label={
+                theme === "dark"
+                  ? "Cambiar a modo claro"
+                  : "Cambiar a modo oscuro"
+              }
+              className="rounded-lg px-2"
+              onClick={toggle}
+            >
+              {theme === "dark" ? (
+                <Sun className="h-5 w-5" />
+              ) : (
+                <Moon className="h-5 w-5" />
+              )}
+            </Button>
+
+            {/* Usuario */}
             {isAuthenticated ? (
-              <>
-                <Link to="/venues">
-                  <Button variant="ghost" className="font-medium text-foreground hover:text-primary hover:bg-primary/10 rounded-lg px-3 py-2 transition-all duration-200">
-                    Canchas
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className="relative h-auto px-3 py-2 rounded-xl flex items-center gap-3 hover:bg-primary/10 transition-all"
+                    aria-label="Abrir menú de usuario"
+                  >
+                    <Avatar className="h-8 w-8 ring-2 ring-primary/20">
+                      <AvatarFallback className="bg-gradient-primary text-white font-semibold text-sm">
+                        {user?.name?.charAt(0).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex flex-col items-start">
+                      <span className="text-sm font-medium text-foreground line-clamp-1 max-w-[12ch]">
+                        {user?.name}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        {roleLabel(user?.role)}
+                      </span>
+                    </div>
+                    <ChevronDown className="w-4 h-4 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
                   </Button>
-                </Link>
-                
-                {/* User Menu */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="relative h-auto px-3 py-2 rounded-xl flex items-center space-x-3 hover:bg-primary/10 transition-all duration-200">
-                      <Avatar className="h-8 w-8 ring-2 ring-primary/20">
-                        <AvatarFallback className="bg-gradient-primary text-white font-semibold text-sm">
-                          {user?.name?.charAt(0).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex flex-col items-start">
-                        <span className="text-sm font-medium text-foreground">{user?.name}</span>
-                        <span className="text-xs text-muted-foreground">{getRoleLabel()}</span>
-                      </div>
-                      <ChevronDown className="w-4 h-4 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-56 bg-background/95 backdrop-blur-md border border-border shadow-xl rounded-xl" align="end">
-                    <DropdownMenuItem onClick={() => navigate(getDashboardRoute())} className="rounded-lg mx-1 my-1 px-3 py-2 hover:bg-primary/10 hover:text-primary transition-colors">
-                      {getRoleIcon()}
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  className="w-56 bg-background/95 backdrop-blur-md border border-border shadow-xl rounded-xl"
+                  align="end"
+                >
+                  <DropdownMenuItem
+                    asChild
+                    className="rounded-lg mx-1 my-1 px-3 py-2 hover:bg-primary/10 hover:text-primary"
+                  >
+                    <Link to={dashboardRoute} className="flex items-center">
+                      {roleIcon(user?.role)}
                       <span className="ml-3">Dashboard</span>
-                    </DropdownMenuItem>
-                    
-                    {user?.role === 'client' && (
-                      <>
-                        <DropdownMenuItem onClick={() => navigate('/dashboard/client/reservations')} className="rounded-lg mx-1 my-1 px-3 py-2 hover:bg-primary/10 hover:text-primary transition-colors">
-                          <Calendar className="mr-3 h-4 w-4" />
-                          <span>Mis Reservas</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => navigate('/venues')} className="rounded-lg mx-1 my-1 px-3 py-2 hover:bg-primary/10 hover:text-primary transition-colors">
-                          <Users className="mr-3 h-4 w-4" />
-                          <span>Buscar Canchas</span>
-                        </DropdownMenuItem>
-                      </>
-                    )}
-                    
-                    {user?.role === 'owner' && (
-                      <>
-                        <DropdownMenuItem onClick={() => navigate('/dashboard/owner')} className="rounded-lg mx-1 my-1 px-3 py-2 hover:bg-primary/10 hover:text-primary transition-colors">
-                          <Building className="mr-3 h-4 w-4" />
-                          <span>Mis Canchas</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => navigate('/dashboard/owner/reservations')} className="rounded-lg mx-1 my-1 px-3 py-2 hover:bg-primary/10 hover:text-primary transition-colors">
-                          <Calendar className="mr-3 h-4 w-4" />
-                          <span>Reservas</span>
-                        </DropdownMenuItem>
-                      </>
-                    )}
-                    
-                    {user?.role === 'controller' && (
-                      <>
-                        <DropdownMenuItem onClick={() => navigate('/dashboard/controller')} className="rounded-lg mx-1 my-1 px-3 py-2 hover:bg-primary/10 hover:text-primary transition-colors">
-                          <QrCode className="mr-3 h-4 w-4" />
-                          <span>Scanner QR</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => navigate('/dashboard/controller/access')} className="rounded-lg mx-1 my-1 px-3 py-2 hover:bg-primary/10 hover:text-primary transition-colors">
-                          <Users className="mr-3 h-4 w-4" />
-                          <span>Control de Acceso</span>
-                        </DropdownMenuItem>
-                      </>
-                    )}
-                    
-                    <DropdownMenuSeparator className="my-2 mx-2" />
-                    <DropdownMenuItem className="rounded-lg mx-1 my-1 px-3 py-2 hover:bg-muted transition-colors">
-                      <Settings className="mr-3 h-4 w-4" />
-                      <span>Configuración</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={handleLogout} className="rounded-lg mx-1 my-1 px-3 py-2 text-destructive hover:text-destructive hover:bg-destructive/10 transition-colors">
-                      <LogOut className="mr-3 h-4 w-4" />
-                      <span>Cerrar Sesión</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </>
+                    </Link>
+                  </DropdownMenuItem>
+
+                  {user?.role === "client" && <ClientLinks />}
+                  {user?.role === "owner" && <OwnerLinks />}
+                  {user?.role === "controller" && <ControllerLinks />}
+
+                  <DropdownMenuSeparator className="my-2 mx-2" />
+                  <DropdownMenuItem className="rounded-lg mx-1 my-1 px-3 py-2 hover:bg-muted">
+                    <Settings className="mr-3 h-4 w-4" />
+                    <span>Configuración</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={handleLogout}
+                    className="rounded-lg mx-1 my-1 px-3 py-2 text-destructive hover:text-destructive hover:bg-destructive/10"
+                  >
+                    <LogOut className="mr-3 h-4 w-4" />
+                    <span>Cerrar Sesión</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             ) : (
-              <div className="flex items-center space-x-3">
+              <div className="flex items-center gap-2">
                 <Link to="/auth/login">
-                  <Button variant="ghost" className="font-medium text-foreground hover:text-primary hover:bg-primary/10 rounded-lg px-4 py-2 transition-all duration-200">
+                  <Button
+                    variant="ghost"
+                    className="font-medium text-foreground hover:text-primary hover:bg-primary/10 rounded-lg px-4 py-2"
+                  >
                     Iniciar Sesión
                   </Button>
                 </Link>
                 <Link to="/auth/register">
-                  <Button className="bg-gradient-primary hover:opacity-90 text-white rounded-lg font-semibold px-4 py-2 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105">
+                  <Button className="bg-gradient-primary hover:opacity-90 text-white rounded-lg font-semibold px-4 py-2 shadow-lg hover:shadow-xl hover:scale-105">
                     Registrarse
                   </Button>
                 </Link>
@@ -237,15 +449,36 @@ const RouterAwareContent = () => {
             )}
           </div>
 
-          {/* Mobile menu button */}
-          <div className="lg:hidden">
+          {/* Botón móvil */}
+          <div className="lg:hidden flex items-center gap-1">
+            <Button
+              variant="ghost"
+              aria-label={
+                theme === "dark"
+                  ? "Cambiar a modo claro"
+                  : "Cambiar a modo oscuro"
+              }
+              className="rounded-lg p-2"
+              onClick={toggle}
+            >
+              {theme === "dark" ? (
+                <Sun className="h-5 w-5" />
+              ) : (
+                <Moon className="h-5 w-5" />
+              )}
+            </Button>
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="p-2 text-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-all duration-200"
+              onClick={() => setIsMobileOpen((v) => !v)}
+              className="p-2 text-foreground hover:text-primary hover:bg-primary/10 rounded-lg"
+              aria-expanded={isMobileOpen}
+              aria-controls="mobile-menu"
+              aria-label={
+                isMobileOpen ? "Cerrar menú móvil" : "Abrir menú móvil"
+              }
             >
-              {isMobileMenuOpen ? (
+              {isMobileOpen ? (
                 <X className="h-6 w-6" />
               ) : (
                 <Menu className="h-6 w-6" />
@@ -254,11 +487,15 @@ const RouterAwareContent = () => {
           </div>
         </div>
 
-        {/* Mobile Navigation Menu */}
-        {isMobileMenuOpen && (
-          <div className="lg:hidden border-t border-border bg-background/95 backdrop-blur-md absolute left-0 right-0 top-full z-50 shadow-lg">
+        {/* Menú móvil */}
+        {isMobileOpen && (
+          <div
+            id="mobile-menu"
+            ref={mobileRef}
+            className="lg:hidden border-t border-border bg-background/95 backdrop-blur-md absolute left-0 right-0 top-full z-50 shadow-lg will-change-transform animate-in fade-in slide-in-from-top-2"
+          >
             <div className="px-2 pt-2 pb-3 space-y-1">
-              {/* Company Links */}
+              {/* Empresa */}
               <div className="py-2">
                 <h3 className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
                   Empresa
@@ -266,32 +503,28 @@ const RouterAwareContent = () => {
                 <div className="space-y-1">
                   <Link
                     to="/about"
-                    className="flex items-center px-3 py-3 text-base font-medium text-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-all duration-200"
-                    onClick={closeMobileMenu}
+                    className="flex items-center px-3 py-3 text-base font-medium text-foreground hover:text-primary hover:bg-primary/10 rounded-lg"
                   >
                     <Info className="mr-3 h-5 w-5" />
                     Quiénes Somos
                   </Link>
                   <Link
                     to="/contact"
-                    className="flex items-center px-3 py-3 text-base font-medium text-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-all duration-200"
-                    onClick={closeMobileMenu}
+                    className="flex items-center px-3 py-3 text-base font-medium text-foreground hover:text-primary hover:bg-primary/10 rounded-lg"
                   >
                     <Phone className="mr-3 h-5 w-5" />
                     Contacto
                   </Link>
                   <Link
                     to="/terms"
-                    className="flex items-center px-3 py-3 text-base font-medium text-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-all duration-200"
-                    onClick={closeMobileMenu}
+                    className="flex items-center px-3 py-3 text-base font-medium text-foreground hover:text-primary hover:bg-primary/10 rounded-lg"
                   >
                     <FileText className="mr-3 h-5 w-5" />
                     Términos
                   </Link>
                   <Link
                     to="/privacy"
-                    className="flex items-center px-3 py-3 text-base font-medium text-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-all duration-200"
-                    onClick={closeMobileMenu}
+                    className="flex items-center px-3 py-3 text-base font-medium text-foreground hover:text-primary hover:bg-primary/10 rounded-lg"
                   >
                     <Shield className="mr-3 h-5 w-5" />
                     Privacidad
@@ -299,102 +532,139 @@ const RouterAwareContent = () => {
                 </div>
               </div>
 
+              {/* Autenticado */}
               {isAuthenticated ? (
                 <>
-                  {/* User Info */}
                   <div className="px-3 py-4 border-t border-border">
-                    <div className="flex items-center space-x-3">
+                    <div className="flex items-center gap-3">
                       <Avatar className="h-12 w-12 ring-2 ring-primary/20">
                         <AvatarFallback className="bg-gradient-primary text-white font-semibold text-lg">
                           {user?.name?.charAt(0).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
                       <div>
-                        <p className="text-base font-medium text-foreground">{user?.name}</p>
-                        <p className="text-sm text-muted-foreground">{getRoleLabel()}</p>
+                        <p className="text-base font-medium text-foreground">
+                          {user?.name}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {roleLabel(user?.role)}
+                        </p>
                       </div>
                     </div>
                   </div>
 
-                  {/* Navigation Links */}
                   <div className="space-y-1">
-                    <Link
+                    <NavLink
                       to="/venues"
-                      className="flex items-center px-3 py-3 text-base font-medium text-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-all duration-200"
-                      onClick={closeMobileMenu}
+                      className={({ isActive }) =>
+                        cx(
+                          "flex items-center px-3 py-3 text-base font-medium rounded-lg transition-colors",
+                          "hover:text-primary hover:bg-primary/10",
+                          isActive ? "text-primary" : "text-foreground"
+                        )
+                      }
                     >
                       <Users className="mr-3 h-5 w-5" />
                       Canchas
-                    </Link>
-                    
-                    <Link
-                      to={getDashboardRoute()}
-                      className="flex items-center px-3 py-3 text-base font-medium text-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-all duration-200"
-                      onClick={closeMobileMenu}
-                    >
-                      {getRoleIcon()}
-                      <span className="ml-3">Dashboard</span>
-                    </Link>
+                    </NavLink>
 
-                    {user?.role === 'client' && (
-                      <Link
+                    <NavLink
+                      to={dashboardRoute}
+                      className={({ isActive }) =>
+                        cx(
+                          "flex items-center px-3 py-3 text-base font-medium rounded-lg transition-colors",
+                          "hover:text-primary hover:bg-primary/10",
+                          isActive ? "text-primary" : "text-foreground"
+                        )
+                      }
+                    >
+                      {roleIcon(user?.role)}
+                      <span className="ml-3">Dashboard</span>
+                    </NavLink>
+
+                    {user?.role === "client" && (
+                      <NavLink
                         to="/dashboard/client/reservations"
-                        className="flex items-center px-3 py-3 text-base font-medium text-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-all duration-200"
-                        onClick={closeMobileMenu}
+                        className={({ isActive }) =>
+                          cx(
+                            "flex items-center px-3 py-3 text-base font-medium rounded-lg transition-colors",
+                            "hover:text-primary hover:bg-primary/10",
+                            isActive ? "text-primary" : "text-foreground"
+                          )
+                        }
                       >
                         <Calendar className="mr-3 h-5 w-5" />
                         Mis Reservas
-                      </Link>
+                      </NavLink>
                     )}
 
-                    {user?.role === 'owner' && (
+                    {user?.role === "owner" && (
                       <>
-                        <Link
+                        <NavLink
                           to="/dashboard/owner"
-                          className="flex items-center px-3 py-3 text-base font-medium text-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-all duration-200"
-                          onClick={closeMobileMenu}
+                          className={({ isActive }) =>
+                            cx(
+                              "flex items-center px-3 py-3 text-base font-medium rounded-lg transition-colors",
+                              "hover:text-primary hover:bg-primary/10",
+                              isActive ? "text-primary" : "text-foreground"
+                            )
+                          }
                         >
                           <Building className="mr-3 h-5 w-5" />
                           Mis Canchas
-                        </Link>
-                        <Link
+                        </NavLink>
+                        <NavLink
                           to="/dashboard/owner/reservations"
-                          className="flex items-center px-3 py-3 text-base font-medium text-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-all duration-200"
-                          onClick={closeMobileMenu}
+                          className={({ isActive }) =>
+                            cx(
+                              "flex items-center px-3 py-3 text-base font-medium rounded-lg transition-colors",
+                              "hover:text-primary hover:bg-primary/10",
+                              isActive ? "text-primary" : "text-foreground"
+                            )
+                          }
                         >
                           <Calendar className="mr-3 h-5 w-5" />
                           Reservas
-                        </Link>
+                        </NavLink>
                       </>
                     )}
 
-                    {user?.role === 'controller' && (
+                    {user?.role === "controller" && (
                       <>
-                        <Link
+                        <NavLink
                           to="/dashboard/controller"
-                          className="flex items-center px-3 py-3 text-base font-medium text-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-all duration-200"
-                          onClick={closeMobileMenu}
+                          className={({ isActive }) =>
+                            cx(
+                              "flex items-center px-3 py-3 text-base font-medium rounded-lg transition-colors",
+                              "hover:text-primary hover:bg-primary/10",
+                              isActive ? "text-primary" : "text-foreground"
+                            )
+                          }
                         >
                           <QrCode className="mr-3 h-5 w-5" />
                           Scanner QR
-                        </Link>
-                        <Link
+                        </NavLink>
+                        <NavLink
                           to="/dashboard/controller/access"
-                          className="flex items-center px-3 py-3 text-base font-medium text-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-all duration-200"
-                          onClick={closeMobileMenu}
+                          className={({ isActive }) =>
+                            cx(
+                              "flex items-center px-3 py-3 text-base font-medium rounded-lg transition-colors",
+                              "hover:text-primary hover:bg-primary/10",
+                              isActive ? "text-primary" : "text-foreground"
+                            )
+                          }
                         >
                           <Users className="mr-3 h-5 w-5" />
                           Control de Acceso
-                        </Link>
+                        </NavLink>
                       </>
                     )}
                   </div>
 
-                  {/* Logout */}
                   <div className="border-t border-border pt-2 mt-2">
                     <button
                       onClick={handleLogout}
-                      className="flex items-center w-full px-3 py-3 text-base font-medium text-destructive hover:text-destructive hover:bg-destructive/10 rounded-lg transition-all duration-200"
+                      className="flex items-center w-full px-3 py-3 text-base font-medium text-destructive hover:text-destructive hover:bg-destructive/10 rounded-lg"
                     >
                       <LogOut className="mr-3 h-5 w-5" />
                       Cerrar Sesión
@@ -405,15 +675,13 @@ const RouterAwareContent = () => {
                 <div className="space-y-2 pt-2 border-t border-border">
                   <Link
                     to="/auth/login"
-                    className="block px-3 py-3 text-base font-medium text-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition-all duration-200"
-                    onClick={closeMobileMenu}
+                    className="block px-3 py-3 text-base font-medium text-foreground hover:text-primary hover:bg-primary/10 rounded-lg"
                   >
                     Iniciar Sesión
                   </Link>
                   <Link
                     to="/auth/register"
-                    className="block px-3 py-3 text-base font-medium bg-gradient-primary text-white rounded-lg text-center shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
-                    onClick={closeMobileMenu}
+                    className="block px-3 py-3 text-base font-medium bg-gradient-primary text-white rounded-lg text-center shadow-lg hover:shadow-xl hover:scale-105"
                   >
                     Registrarse
                   </Link>
@@ -427,48 +695,7 @@ const RouterAwareContent = () => {
   );
 };
 
-// Fallback navbar without router dependencies
-const FallbackNavbar = () => {
-  const { isAuthenticated } = useAuthStore();
-  
-  return (
-    <nav className="bg-background/95 backdrop-blur-md border-b border-border sticky top-0 z-50 shadow-sm">
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
-        <div className="flex justify-between h-14 sm:h-16">
-          <div className="flex items-center">
-            <a href="/" className="flex items-center space-x-2 group">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-primary rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
-                <span className="text-white font-bold text-sm sm:text-lg">R</span>
-              </div>
-              <span className="font-bold text-xl sm:text-2xl bg-gradient-primary bg-clip-text text-transparent">
-                ROGÜ
-              </span>
-            </a>
-          </div>
-
-          <div className="flex items-center space-x-3">
-            {!isAuthenticated && (
-              <div className="flex items-center space-x-2">
-                <a href="/auth/login">
-                  <Button variant="ghost" className="font-medium text-foreground hover:text-primary hover:bg-primary/10 rounded-lg px-4 py-2 transition-all duration-200">
-                    Iniciar Sesión
-                  </Button>
-                </a>
-                <a href="/auth/register">
-                  <Button className="bg-gradient-primary hover:opacity-90 text-white rounded-lg font-semibold px-4 py-2 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105">
-                    Registrarse
-                  </Button>
-                </a>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    </nav>
-  );
-};
-
-// Error boundary component
+// --- Fallback si hay error del Router ---
 class RouterErrorBoundary extends React.Component<
   { children: React.ReactNode },
   { hasError: boolean }
@@ -477,28 +704,42 @@ class RouterErrorBoundary extends React.Component<
     super(props);
     this.state = { hasError: false };
   }
-
   static getDerivedStateFromError(error: Error) {
-    // Check if it's a router-related error
-    if (error.message.includes('useNavigate') || error.message.includes('Router')) {
+    if (
+      error.message.includes("useNavigate") ||
+      error.message.includes("Router")
+    ) {
       return { hasError: true };
     }
     return null;
   }
-
   render() {
     if (this.state.hasError) {
-      return <FallbackNavbar />;
+      return (
+        <nav className="bg-background/95 backdrop-blur-md border-b border-border sticky top-0 z-50 shadow-sm">
+          <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
+            <div className="flex justify-between h-14 sm:h-16">
+              <div className="flex items-center">
+                <a href="/" className="flex items-center space-x-2 group">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gray-900 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
+                    <span className="font-bold text-sm sm:text-lg">R</span>
+                  </div>
+                  <span className="font-bold text-xl sm:text-2xl bg-gradient-primary bg-clip-text text-transparent">
+                    ROGÜ
+                  </span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </nav>
+      );
     }
-
     return this.props.children;
   }
 }
 
-export const Navbar = () => {
-  return (
-    <RouterErrorBoundary>
-      <RouterAwareContent />
-    </RouterErrorBoundary>
-  );
-};
+export const Navbar: React.FC = () => (
+  <RouterErrorBoundary>
+    <RouterAwareContent />
+  </RouterErrorBoundary>
+);

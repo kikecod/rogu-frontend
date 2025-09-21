@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Input } from '../../components/ui/input';
 import { Button } from '../../components/ui/button';
@@ -9,44 +9,52 @@ import { useAuthStore } from '../../store/authStore';
 import { Search, SlidersHorizontal, MapPin } from 'lucide-react';
 import type { SportType } from '../../types';
 
-const sportLabels = {
+// TIPADO correcto para etiquetas
+const sportLabels: Record<SportType, string> = {
   soccer: 'Fútbol',
   basketball: 'Básquetbol',
   tennis: 'Tenis',
   volleyball: 'Voleibol',
 };
 
+
 const VenueList = () => {
+  
   const [searchParams] = useSearchParams();
-  const { filteredVenues, setFilter, selectedSport, selectedLocation } = useVenueStore();
+
+  // 👇 OJO: ahora traemos filters y derivamos selectedSport/selectedLocation de ahí
+  const { filteredVenues, setFilter, resetFilters, filters } = useVenueStore();
+  const selectedSport = filters.sport;
+  const selectedLocation = filters.location ?? '';
+
   const { isAuthenticated } = useAuthStore();
   const navigate = useNavigate();
+
   const [localLocation, setLocalLocation] = useState('');
   const [localSport, setLocalSport] = useState<SportType | 'all'>('all');
 
-  // Redirect if not authenticated
   useEffect(() => {
     if (!isAuthenticated) {
       navigate('/auth/login');
-      return;
     }
   }, [isAuthenticated, navigate]);
 
+  // Aplica filtros desde querystring
   useEffect(() => {
-    // Apply filters from URL params
-    const sportParam = searchParams.get('sport') as SportType;
-    const locationParam = searchParams.get('location') || '';
-    
-    if (sportParam) {
+    const sportParam = searchParams.get('sport') as SportType | null;
+    const locationParam = searchParams.get('location') ?? '';
+
+    const validSports: SportType[] = ['soccer', 'basketball', 'tennis', 'volleyball'];
+
+    if (sportParam && validSports.includes(sportParam)) {
       setLocalSport(sportParam);
       setFilter(sportParam, locationParam);
     } else {
       setLocalSport('all');
+      setFilter(null, locationParam);
     }
-    
-    if (locationParam) {
-      setLocalLocation(locationParam);
-    }
+
+    setLocalLocation(locationParam);
   }, [searchParams, setFilter]);
 
   const handleSearch = () => {
@@ -56,13 +64,10 @@ const VenueList = () => {
   const clearFilters = () => {
     setLocalSport('all');
     setLocalLocation('');
-    setFilter(null, '');
+    resetFilters(); // 👈 usa la acción del store
   };
 
-  if (!isAuthenticated) {
-    return null; // Will redirect in useEffect
-  }
-
+  if (!isAuthenticated) return null;
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 mobile-padding">

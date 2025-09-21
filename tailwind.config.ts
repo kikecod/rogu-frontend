@@ -15,36 +15,37 @@ const config: Config = {
         border: "hsl(var(--border))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
-        card: { 
-          DEFAULT: "hsl(var(--card))", 
-          foreground: "hsl(var(--card-foreground))" 
+
+        card: {
+          DEFAULT: "hsl(var(--card))",
+          foreground: "hsl(var(--card-foreground))"
         },
-        popover: { 
-          DEFAULT: "hsl(var(--popover))", 
-          foreground: "hsl(var(--popover-foreground))" 
+        popover: {
+          DEFAULT: "hsl(var(--popover))",
+          foreground: "hsl(var(--popover-foreground))"
         },
-        primary: { 
-          DEFAULT: "hsl(var(--primary))", 
+        primary: {
+          DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
           light: "hsl(var(--primary-light))",
           dark: "hsl(var(--primary-dark))"
         },
-        secondary: { 
-          DEFAULT: "hsl(var(--secondary))", 
-          foreground: "hsl(var(--secondary-foreground))" 
+        secondary: {
+          DEFAULT: "hsl(var(--secondary))",
+          foreground: "hsl(var(--secondary-foreground))"
         },
-        muted: { 
-          DEFAULT: "hsl(var(--muted))", 
-          foreground: "hsl(var(--muted-foreground))" 
+        muted: {
+          DEFAULT: "hsl(var(--muted))",
+          foreground: "hsl(var(--muted-foreground))"
         },
-        accent: { 
-          DEFAULT: "hsl(var(--accent))", 
+        accent: {
+          DEFAULT: "hsl(var(--accent))",
           foreground: "hsl(var(--accent-foreground))",
           light: "hsl(var(--accent-light))"
         },
-        destructive: { 
-          DEFAULT: "hsl(var(--destructive))", 
-          foreground: "hsl(var(--destructive-foreground))" 
+        destructive: {
+          DEFAULT: "hsl(var(--destructive))",
+          foreground: "hsl(var(--destructive-foreground))"
         },
         ring: "hsl(var(--ring))",
 
@@ -53,26 +54,35 @@ const config: Config = {
         warning: "hsl(var(--warning))",
         info: "hsl(var(--info))",
 
-        /* Gray scale mejorada */
+        /* Escala de grises (Fila 1) */
         gray: {
-          50: "241 242 245", /* #f1f2f5 - casi blanco */
-          100: "217 219 224", /* #d9dbe0 - gris muy claro */
-          200: "188 190 200", /* #bcbec8 - gris claro */
-          300: "151 155 170", /* #979baa - gris medio */
-          400: "151 155 170", /* #979baa - gris medio */
-          500: "72 74 86", /* #484a56 - gris oscuro */
-          600: "72 74 86", /* #484a56 - gris oscuro */
-          700: "24 25 31", /* #18191f - negro muy oscuro */
-          800: "24 25 31", /* #18191f - negro muy oscuro */
-          900: "24 25 31", /* #18191f - negro muy oscuro */
+          900: "#18191f", // negro muy oscuro
+          700: "#484a56", // gris oscuro
+          500: "#979baa", // gris medio
+          300: "#bcbec8", // gris claro
+          200: "#d9dbe0", // gris muy claro
+          50: "#f1f2f5",  // casi blanco
         },
 
-        /* Colores deportivos */
-        sports: {
-          soccer: "hsl(var(--sports-soccer))",
-          basketball: "hsl(var(--sports-basketball))",
-          tennis: "hsl(var(--sports-tennis))",
-          volleyball: "hsl(var(--sports-volleyball))",
+        /* Azules claros (Fila 2) */
+        blue: {
+          500: "#4f74ea", // azul medio
+          300: "#809cf5", // azul claro
+          100: "#c2cff7", // azul muy claro
+        },
+
+        /* Violetas (Fila 3) */
+        violet: {
+          500: "#4438f5", // violeta intenso
+          300: "#bebafb", // violeta claro
+          100: "#bbb6f8", // violeta muy claro
+        },
+
+        /* Azules-violetas (Fila 4) */
+        indigo: {
+          500: "#4f74ea", // azul
+          300: "#809cf5", // azul claro
+          100: "#c2cff7", // azul muy claro
         },
 
         /* Sidebar tokens */
@@ -142,9 +152,9 @@ const config: Config = {
       },
       boxShadow: {
         'soft': '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
-         'glow': '0 0 0 1px rgb(79 116 234 / 0.1), 0 4px 16px 0 rgb(79 116 234 / 0.15), 0 8px 32px -4px rgb(79 116 234 / 0.1)',
-         'sports': '0 4px 20px -2px rgb(79 116 234 / 0.25), 0 8px 40px -4px rgb(68 56 245 / 0.15)',
-         'card-custom': '0 4px 6px -1px rgb(24 25 31 / 0.1), 0 2px 4px -2px rgb(24 25 31 / 0.1), 0 0 0 1px rgb(24 25 31 / 0.05)',
+        'glow': '0 0 0 1px rgb(79 116 234 / 0.1), 0 4px 16px 0 rgb(79 116 234 / 0.15), 0 8px 32px -4px rgb(79 116 234 / 0.1)',
+        'sports': '0 4px 20px -2px rgb(79 116 234 / 0.25), 0 8px 40px -4px rgb(68 56 245 / 0.15)',
+        'card-custom': '0 4px 6px -1px rgb(24 25 31 / 0.1), 0 2px 4px -2px rgb(24 25 31 / 0.1), 0 0 0 1px rgb(24 25 31 / 0.05)',
         'navbar': '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
       },
       backdropBlur: {

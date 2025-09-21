@@ -3,11 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardFooter } from '../../components/ui/card';
 import { Badge } from '../../components/ui/badge';
 import { Button } from '../../components/ui/button';
-import { Star, MapPin, Users, ArrowRight } from 'lucide-react';
+import { Star, MapPin, ArrowRight, Heart } from 'lucide-react';
 import type { Venue } from '../../types';
 
 interface VenueCardProps {
   venue: Venue;
+  isFavorite?: boolean;
+  onToggleFavorite?: (id: string) => void;
 }
 
 const sportLabels = {
@@ -15,92 +17,142 @@ const sportLabels = {
   basketball: 'Básquetbol',
   tennis: 'Tenis',
   volleyball: 'Voleibol',
-};
+} as const;
 
-const sportColors = {
+const sportColors: Record<Venue['sport'], string> = {
   soccer: '#22c55e',
   basketball: '#f59e0b',
   tennis: '#ef4444',
   volleyball: '#9333ea',
 };
 
-export const VenueCard: React.FC<VenueCardProps> = ({ venue }) => {
+export const VenueCard: React.FC<VenueCardProps> = ({ venue, isFavorite, onToggleFavorite }) => {
   const navigate = useNavigate();
-
-  const handleReserve = () => {
-    navigate(`/venue/${venue.id}`);
-  };
+  const handleReserve = () => navigate(`/venue/${venue.id}`);
 
   return (
-    <Card className="overflow-hidden group hover:scale-[1.02] hover:-translate-y-1 transition-all duration-300 w-full">
-      <div className="relative">
-        <img 
-          src={venue.images[0]} 
+    <Card
+      className="
+        group relative w-full overflow-hidden rounded-2xl
+        bg-[#171922] ring-1 ring-white/10 shadow-lg
+        transition-all duration-300 hover:-translate-y-1 hover:shadow-xl
+        focus-within:ring-2 focus-within:ring-indigo-500/70
+      "
+    >
+      {/* IMAGE */}
+      <div className="relative aspect-[4/3] w-full overflow-hidden">
+        <img
+          src={venue.images?.[0]}
           alt={venue.name}
-          className="w-full h-48 sm:h-52 object-cover group-hover:scale-105 transition-transform duration-500"
+          loading="lazy"
+          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-        <Badge 
-          className="absolute top-3 left-3 sm:top-4 sm:left-4 text-white font-semibold px-3 py-1 text-xs sm:text-sm rounded-full shadow-lg backdrop-blur-sm"
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#0b0d12] via-[#0b0d12]/40 to-transparent" />
+
+        {/* Sport pill */}
+        <Badge
+          className="absolute left-3 top-3 rounded-full px-3 py-1 text-xs font-semibold text-white shadow-md backdrop-blur-sm sm:left-4 sm:top-4 sm:text-sm"
           style={{ backgroundColor: sportColors[venue.sport] }}
         >
           {sportLabels[venue.sport]}
         </Badge>
-        <div className="absolute top-3 right-3 sm:top-4 sm:right-4 bg-white/90 backdrop-blur-sm rounded-full p-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
-          <ArrowRight className="w-4 h-4 text-gray-700" />
+
+        {/* Favorite */}
+        <button
+          type="button"
+          aria-label={isFavorite ? 'Quitar de favoritos' : 'Agregar a favoritos'}
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleFavorite?.(venue.id);
+          }}
+          className="
+            absolute right-3 top-3 rounded-full bg-black/50 p-2 text-white backdrop-blur
+            transition hover:bg-black/70 sm:right-4 sm:top-4
+          "
+        >
+          <Heart className={`h-4 w-4 ${isFavorite ? 'fill-pink-500 text-pink-500' : ''}`} />
+        </button>
+
+        {/* Hint arrow */}
+        <div
+          className="
+            absolute right-3 bottom-3 rounded-full bg-white/90 p-2 text-gray-700 opacity-0
+            transition-all duration-300 translate-y-2 group-hover:translate-y-0 group-hover:opacity-100
+            sm:right-4 sm:bottom-4
+          "
+        >
+          <ArrowRight className="h-4 w-4" />
         </div>
       </div>
-      
-      <CardContent className="p-4 sm:p-6">
-        <div className="flex justify-between items-start mb-3">
-          <h3 className="font-bold text-lg sm:text-xl text-gray-900 line-clamp-1 group-hover:text-blue-600 transition-colors duration-300">
+
+      {/* CONTENT */}
+      <CardContent className="p-4 sm:p-5">
+        <div className="mb-3 flex items-start justify-between gap-3">
+          <h3 className="line-clamp-1 text-lg font-semibold leading-snug text-white sm:text-xl">
             {venue.name}
           </h3>
-          <div className="flex items-center space-x-1 flex-shrink-0 ml-2">
-            <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-            <span className="text-sm sm:text-base font-semibold text-gray-900">{venue.rating}</span>
-            <span className="text-xs text-gray-500 hidden sm:inline">({venue.totalReviews})</span>
+          <div className="flex flex-shrink-0 items-center gap-1 text-amber-400">
+            <Star className="h-4 w-4 fill-amber-400" />
+            <span className="text-sm font-semibold text-amber-400">{venue.rating.toFixed(1)}</span>
+            <span className="hidden text-xs text-zinc-400 sm:inline">({venue.totalReviews})</span>
           </div>
         </div>
-        
-        <div className="flex items-center text-gray-600 mb-3">
-          <MapPin className="w-4 h-4 mr-2 flex-shrink-0" />
-          <span className="text-sm sm:text-base font-medium truncate">{venue.location}</span>
+
+        <div className="mb-3 flex items-center text-zinc-400">
+          <MapPin className="mr-2 h-4 w-4 flex-shrink-0 text-zinc-500" />
+          <span className="truncate text-sm sm:text-base">{venue.location}</span>
         </div>
-        
-        <p className="text-sm sm:text-base text-gray-600 mb-4 line-clamp-2 leading-relaxed">
+
+        <p className="mb-4 line-clamp-2 text-sm leading-relaxed text-zinc-300/90 sm:text-[0.95rem]">
           {venue.description}
         </p>
-        
-        <div className="flex flex-wrap gap-1 sm:gap-2 mb-4">
-          {venue.amenities.slice(0, 3).map((amenity, index) => (
-            <Badge key={index} variant="outline" className="text-xs font-medium rounded-full px-2 py-1 border-gray-200 text-gray-600 hover:border-blue-300 hover:text-blue-600 transition-colors">
-              {amenity}
-            </Badge>
+
+        {/* Amenities (compact) */}
+        <div className="mb-1 flex flex-wrap gap-2">
+          {venue.amenities.slice(0, 3).map((a) => (
+            <span
+              key={a}
+              className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-xs text-zinc-300"
+            >
+              {a}
+            </span>
           ))}
           {venue.amenities.length > 3 && (
-            <Badge variant="outline" className="text-xs font-medium rounded-full px-2 py-1 border-gray-200 text-gray-600">
-              +{venue.amenities.length - 3} más
-            </Badge>
+            <span className="rounded-full bg-white/5 px-2.5 py-1 text-xs text-zinc-400">
+              +{venue.amenities.length - 3}
+            </span>
           )}
         </div>
       </CardContent>
-      
-      <CardFooter className="p-4 sm:p-6 pt-0 flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-4">
+
+      {/* FOOTER / PRICE + CTA */}
+      <CardFooter
+        className="
+          mt-auto flex flex-col items-center justify-between gap-3 border-t border-white/10
+          p-4 sm:flex-row sm:gap-4 sm:p-5
+        "
+      >
         <div className="text-center sm:text-left">
-          <span className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+          <span className="bg-gradient-to-r from-indigo-400 to-fuchsia-400 bg-clip-text text-2xl font-extrabold tracking-tight text-transparent sm:text-3xl">
             ${venue.pricePerHour.toLocaleString()}
           </span>
-          <span className="text-sm sm:text-base text-gray-600 font-medium">/hora</span>
+          <span className="ml-1 text-sm font-medium text-zinc-400">/hora</span>
         </div>
-        <Button 
-          onClick={handleReserve} 
-          className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 w-full sm:w-auto px-6"
+
+        <Button
+          onClick={handleReserve}
+          className="
+            w-full rounded-xl bg-gradient-to-r from-indigo-500 to-fuchsia-500
+            px-6 py-2 font-semibold text-white shadow-lg
+            transition-all duration-200 hover:from-indigo-600 hover:to-fuchsia-600 hover:shadow-xl hover:brightness-[1.02]
+            focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-[#171922]
+            sm:w-auto
+          "
         >
-          <div className="flex items-center gap-2">
+          <span className="flex items-center gap-2">
             Reservar
-            <ArrowRight className="w-4 h-4" />
-          </div>
+            <ArrowRight className="h-4 w-4" />
+          </span>
         </Button>
       </CardFooter>
     </Card>
