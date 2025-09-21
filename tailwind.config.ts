@@ -55,16 +55,16 @@ const config: Config = {
 
         /* Gray scale mejorada */
         gray: {
-          50: "hsl(var(--gray-50))",
-          100: "hsl(var(--gray-100))",
-          200: "hsl(var(--gray-200))",
-          300: "hsl(var(--gray-300))",
-          400: "hsl(var(--gray-400))",
-          500: "hsl(var(--gray-500))",
-          600: "hsl(var(--gray-600))",
-          700: "hsl(var(--gray-700))",
-          800: "hsl(var(--gray-800))",
-          900: "hsl(var(--gray-900))",
+          50: "241 242 245", /* #f1f2f5 - casi blanco */
+          100: "217 219 224", /* #d9dbe0 - gris muy claro */
+          200: "188 190 200", /* #bcbec8 - gris claro */
+          300: "151 155 170", /* #979baa - gris medio */
+          400: "151 155 170", /* #979baa - gris medio */
+          500: "72 74 86", /* #484a56 - gris oscuro */
+          600: "72 74 86", /* #484a56 - gris oscuro */
+          700: "24 25 31", /* #18191f - negro muy oscuro */
+          800: "24 25 31", /* #18191f - negro muy oscuro */
+          900: "24 25 31", /* #18191f - negro muy oscuro */
         },
 
         /* Colores deportivos */
@@ -142,9 +142,9 @@ const config: Config = {
       },
       boxShadow: {
         'soft': '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
-        'glow': '0 0 0 1px hsl(var(--primary) / 0.1), 0 4px 16px 0 hsl(var(--primary) / 0.15), 0 8px 32px -4px hsl(var(--primary) / 0.1)',
-        'sports': '0 4px 20px -2px hsl(var(--primary) / 0.25), 0 8px 40px -4px hsl(var(--accent) / 0.15)',
-        'card-custom': '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1), 0 0 0 1px rgb(0 0 0 / 0.05)',
+         'glow': '0 0 0 1px rgb(79 116 234 / 0.1), 0 4px 16px 0 rgb(79 116 234 / 0.15), 0 8px 32px -4px rgb(79 116 234 / 0.1)',
+         'sports': '0 4px 20px -2px rgb(79 116 234 / 0.25), 0 8px 40px -4px rgb(68 56 245 / 0.15)',
+         'card-custom': '0 4px 6px -1px rgb(24 25 31 / 0.1), 0 2px 4px -2px rgb(24 25 31 / 0.1), 0 0 0 1px rgb(24 25 31 / 0.05)',
         'navbar': '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
       },
       backdropBlur: {
