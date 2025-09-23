@@ -38,14 +38,83 @@ export function mergeRefs<T>(...refs: Array<React.Ref<T> | undefined>) {
 export const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms));
 
 export function debounce<T extends (...args: any[]) => void>(fn: T, delay = 250) {
-  let t: ReturnType<typeof setTimeout>;
+  let timer: ReturnType<typeof setTimeout>;
   return (...args: Parameters<T>) => {
-    clearTimeout(t);
-    t = setTimeout(() => fn(...args), delay);
+    clearTimeout(timer);
+    timer = setTimeout(() => fn(...args), delay);
   };
 }
 
-// 6) clamp: límites numéricos (animaciones, sliders)
+// 6) API helpers for backend communication
+export const API_BASE_URL = 'http://localhost:3000/api';
+
+export interface PersonaData {
+  nombres: string;
+  paterno: string;
+  materno: string;
+  documentoTipo: string;
+  documentoNumero: string;
+  telefono: string;
+  fechaNacimiento: string;
+  genero: string;
+}
+
+export interface UsuarioData {
+  idPersona: number;
+  correo: string;
+  contrasena: string;
+  correoVerificado: boolean;
+}
+
+export async function createPersona(data: PersonaData) {
+  const response = await fetch(`${API_BASE_URL}/personas`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    throw new Error('Error al crear la persona');
+  }
+
+  return response.json();
+}
+
+export async function registerUsuario(data: UsuarioData) {
+  const response = await fetch(`${API_BASE_URL}/auth/register`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    throw new Error('Error al registrar el usuario');
+  }
+
+  return response.json();
+}
+
+export async function loginUsuario(correo: string, contrasena: string) {
+  const response = await fetch(`${API_BASE_URL}/auth/login`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ correo, contrasena }),
+  });
+
+  if (!response.ok) {
+    throw new Error('Credenciales inválidas');
+  }
+
+  return response.json();
+}
+
+// 7) clamp: límites numéricos (animaciones, sliders)
 export const clamp = (n: number, min: number, max: number) => Math.min(max, Math.max(min, n));
 
 // 7) formateadores comunes (moneda / fecha)

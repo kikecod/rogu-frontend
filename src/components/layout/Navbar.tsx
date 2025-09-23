@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import logoRogu from "../../assets/logo_rogu.png";
 import { NavLink, Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "../ui/button";
 import { useAuthStore } from "../../store/authStore";
@@ -50,11 +51,13 @@ const NavLogo = ({ onClick }: { onClick?: () => void }) => (
     onClick={onClick}
     aria-label="Ir al inicio"
   >
-    {/* Caja del logo: oscuro en modo claro, gradiente marca en modo oscuro */}
-    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105 bg-gradient-to-tr from-gray-900 to-gray-700 dark:from-[hsl(var(--primary-dark))] dark:to-[hsl(var(--primary))]">
-      {/* Letra siempre blanca para máximo contraste */}
-      <span className="text-white font-bold text-sm sm:text-lg">R</span>
-    </div>
+    {/* Logo de la marca */}
+    <img
+      src={logoRogu}
+      alt="Logo ROGÜ"
+      className="w-8 h-8 sm:w-10 sm:h-10 object-contain rounded-xl shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105 bg-white dark:bg-transparent"
+      draggable={false}
+    />
     {/* Marca: texto sólido en claro para legibilidad; gradiente sólo en oscuro */}
     <span className="font-bold text-xl sm:text-2xl text-foreground dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-r dark:from-[hsl(var(--primary))] dark:to-[hsl(var(--accent))]">
       ROGÜ

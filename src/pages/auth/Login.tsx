@@ -4,11 +4,9 @@ import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../components/ui/select';
 import { useAuthStore } from '../../store/authStore';
 import { useToast } from '../../hooks/use-toast';
-import { Eye, EyeOff, Mail, Lock, User, ArrowRight, Sparkles } from 'lucide-react';
-import type { UserRole } from '../../types';
+import { Eye, EyeOff, Mail, Lock, ArrowRight, Sparkles } from 'lucide-react';
 
 /* =========================================================
    LoginPlus – más UX, accesibilidad y consistencia con el tema
@@ -23,12 +21,6 @@ import type { UserRole } from '../../types';
 
 const EMAIL_RE = /^(?:[a-zA-Z0-9_'^&+{}=~!-]+(?:\.[a-zA-Z0-9_'^&+{}=~!-]+)*|"(?:[^"\\]|\\.)+")@(?:(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-zA-Z-]*[a-zA-Z]:.+)\])$/;
 
-const DEMOS: Array<{ label: string; email: string; role: UserRole }> = [
-  { label: 'Cliente', email: 'cliente@demo.com', role: 'client' },
-  { label: 'Propietario', email: 'owner@demo.com', role: 'owner' },
-  { label: 'Controlador', email: 'controller@demo.com', role: 'controller' },
-];
-
 const Login: React.FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -37,7 +29,6 @@ const Login: React.FC = () => {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    role: '' as UserRole | '',
   });
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -49,8 +40,8 @@ const Login: React.FC = () => {
     const saved = localStorage.getItem('login:remember');
     if (saved) {
       try {
-        const parsed = JSON.parse(saved) as { email?: string; role?: UserRole; remember?: boolean };
-        setFormData((p) => ({ ...p, email: parsed.email || '', role: (parsed.role as any) || '' }));
+        const parsed = JSON.parse(saved) as { email?: string; remember?: boolean };
+        setFormData((p) => ({ ...p, email: parsed.email || '' }));
         setRemember(Boolean(parsed.remember ?? true));
       } catch {}
     }
@@ -58,7 +49,6 @@ const Login: React.FC = () => {
 
   const errors = useMemo(() => {
     const e: Record<string, string> = {};
-    if (!formData.role) e.role = 'Selecciona tu tipo de usuario';
     if (!formData.email) e.email = 'Ingresa tu correo';
     else if (!EMAIL_RE.test(formData.email)) e.email = 'Correo inválido';
     if (!formData.password) e.password = 'Ingresa tu contraseña';
@@ -72,42 +62,33 @@ const Login: React.FC = () => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const fillDemo = (d: { email: string; role: UserRole }) => {
-    setFormData({ email: d.email, password: 'demo', role: d.role });
-    setTouched({});
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setTouched({ role: true, email: true, password: true });
+    setTouched({ email: true, password: true });
     if (!isValid) return;
 
     setIsLoading(true);
     try {
-      await login(formData.email, formData.password, formData.role as UserRole);
+      // El login ahora maneja la respuesta del backend directamente
+      await login(formData.email, formData.password);
       toast({ title: '¡Bienvenido de vuelta! 👋', description: 'Has iniciado sesión correctamente' });
 
       // Persistencia opcional
       if (remember) {
         localStorage.setItem(
           'login:remember',
-          JSON.stringify({ email: formData.email, role: formData.role, remember })
+          JSON.stringify({ email: formData.email, remember })
         );
       } else {
         localStorage.removeItem('login:remember');
       }
 
-      const dashboardRoutes: Record<UserRole, string> = {
-        client: '/dashboard/client',
-        owner: '/dashboard/owner',
-        controller: '/dashboard/controller',
-      } as const;
-      navigate(dashboardRoutes[formData.role as UserRole]);
+      // Redirigir al dashboard principal (se determinará el rol desde el backend)
+      navigate('/dashboard/client'); // Por defecto, o se puede cambiar según el rol del usuario
     } catch (error) {
       toast({
         title: 'Error de autenticación',
-        description:
-          'Credenciales inválidas. Prueba con: cliente@demo.com, owner@demo.com o controller@demo.com (cualquier contraseña).',
+        description: 'Credenciales inválidas. Verifica tu correo y contraseña.',
         variant: 'destructive',
       });
     } finally {
@@ -136,29 +117,6 @@ const Login: React.FC = () => {
 
           <CardContent className="space-y-5 sm:space-y-6">
             <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6" noValidate>
-              {/* Rol */}
-              <div className="space-y-2">
-                <Label htmlFor="role" className="text-sm font-medium text-foreground">
-                  Tipo de Usuario
-                </Label>
-                <Select value={formData.role} onValueChange={(value) => handleChange('role', value)}>
-                  <SelectTrigger id="role" className="h-11 sm:h-12 rounded-xl border-border bg-background">
-                    <div className="flex items-center gap-3 text-foreground">
-                      <User className="w-4 h-4 text-muted-foreground" />
-                      <SelectValue placeholder="Selecciona tu rol" />
-                    </div>
-                  </SelectTrigger>
-                  <SelectContent className="rounded-xl border-border">
-                    <SelectItem value="client" className="rounded-lg">Cliente — Reservo canchas</SelectItem>
-                    <SelectItem value="owner" className="rounded-lg">Propietario — Tengo canchas</SelectItem>
-                    <SelectItem value="controller" className="rounded-lg">Controlador — Verifico accesos</SelectItem>
-                  </SelectContent>
-                </Select>
-                {touched.role && !!errors.role && (
-                  <p className="text-xs text-destructive">{errors.role}</p>
-                )}
-              </div>
-
               {/* Email */}
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-sm font-medium text-foreground">
@@ -274,36 +232,6 @@ const Login: React.FC = () => {
                 Crear cuenta gratuita
                 <ArrowRight className="w-4 h-4" />
               </Link>
-            </div>
-
-            {/* Demo credentials chips */}
-            <div className="mt-4 sm:mt-6">
-              <p className="text-xs sm:text-sm text-muted-foreground mb-2">Prueba con un usuario demo:</p>
-              <div className="flex flex-wrap gap-2">
-                {DEMOS.map((d) => (
-                  <button
-                    key={d.email}
-                    type="button"
-                    onClick={() => fillDemo(d)}
-                    className="text-xs sm:text-sm px-3 py-1.5 rounded-full border border-border bg-background hover:bg-muted/40 text-foreground"
-                  >
-                    {d.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Demo helper */}
-            <div className="mt-6 p-4 sm:p-5 bg-muted/30 rounded-xl border border-border text-xs sm:text-sm">
-              <div className="flex items-center gap-2 font-semibold text-foreground mb-2">
-                • Credenciales de prueba
-              </div>
-              <div className="grid grid-cols-1 gap-1 text-muted-foreground">
-                <div className="flex justify-between gap-3"><span>Cliente:</span><span className="font-mono">cliente@demo.com</span></div>
-                <div className="flex justify-between gap-3"><span>Propietario:</span><span className="font-mono">owner@demo.com</span></div>
-                <div className="flex justify-between gap-3"><span>Controlador:</span><span className="font-mono">controller@demo.com</span></div>
-                <div className="flex justify-between gap-3 border-t border-border pt-1 mt-1"><span>Contraseña:</span><span className="font-mono">cualquier</span></div>
-              </div>
             </div>
           </CardContent>
         </Card>

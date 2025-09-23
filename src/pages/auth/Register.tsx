@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { useAuthStore } from '../../store/authStore';
 import { useToast } from '../../hooks/use-toast';
 import { Eye, EyeOff, Mail, Lock, User, ArrowRight, UserPlus, ShieldCheck } from 'lucide-react';
+import { createPersona, registerUsuario, type PersonaData, type UsuarioData } from '../../lib/utils';
 import type { UserRole } from '../../types';
 
 /* =========================================================
@@ -47,7 +48,14 @@ const Register: React.FC = () => {
   const { register } = useAuthStore();
 
   const [formData, setFormData] = useState({
-    name: '',
+    nombres: '',
+    paterno: '',
+    materno: '',
+    documentoTipo: 'CC' as 'CC' | 'DNI' | 'PASAPORTE',
+    documentoNumero: '',
+    telefono: '',
+    fechaNacimiento: '',
+    genero: '' as 'MASCULINO' | 'FEMENINO' | '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -63,7 +71,13 @@ const Register: React.FC = () => {
 
   const errors = useMemo(() => {
     const e: Record<string, string> = {};
-    if (!formData.name.trim()) e.name = 'Ingresa tu nombre';
+    if (!formData.nombres.trim()) e.nombres = 'Ingresa tus nombres';
+    if (!formData.paterno.trim()) e.paterno = 'Ingresa tu apellido paterno';
+    if (!formData.materno.trim()) e.materno = 'Ingresa tu apellido materno';
+    if (!formData.documentoNumero.trim()) e.documentoNumero = 'Ingresa tu número de documento';
+    if (!formData.telefono.trim()) e.telefono = 'Ingresa tu teléfono';
+    if (!formData.fechaNacimiento) e.fechaNacimiento = 'Ingresa tu fecha de nacimiento';
+    if (!formData.genero) e.genero = 'Selecciona tu género';
     if (!formData.role) e.role = 'Selecciona tu tipo de usuario';
     if (!formData.email.trim()) e.email = 'Ingresa tu correo';
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) e.email = 'Correo inválido';
@@ -81,13 +95,45 @@ const Register: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setTouched({ name: true, email: true, password: true, confirmPassword: true, role: true });
+    setTouched({ 
+      nombres: true, paterno: true, materno: true, documentoNumero: true, 
+      telefono: true, fechaNacimiento: true, genero: true,
+      email: true, password: true, confirmPassword: true, role: true 
+    });
     if (!isValid) return;
 
     setIsLoading(true);
     try {
-      await register(formData.name, formData.email, formData.password, formData.role as UserRole);
+      // Paso 1: Crear persona
+      const personaData: PersonaData = {
+        nombres: formData.nombres,
+        paterno: formData.paterno,
+        materno: formData.materno,
+        documentoTipo: formData.documentoTipo,
+        documentoNumero: formData.documentoNumero,
+        telefono: formData.telefono,
+        fechaNacimiento: formData.fechaNacimiento,
+        genero: formData.genero,
+      };
+
+      const persona = await createPersona(personaData);
+
+      // Paso 2: Registrar usuario
+      const usuarioData: UsuarioData = {
+        idPersona: persona.idPersona,
+        correo: formData.email,
+        contrasena: formData.password,
+        correoVerificado: true,
+      };
+
+      const usuario = await registerUsuario(usuarioData);
+
+      // Paso 3: Hacer login automáticamente
+      const fullName = `${formData.nombres} ${formData.paterno} ${formData.materno}`;
+      await register(fullName, formData.email, formData.password, formData.role as UserRole, usuario.idUsuario.toString());
+      
       toast({ title: '¡Cuenta creada exitosamente! 🎉', description: 'Bienvenido a ROGÜ, tu plataforma de reservas deportivas' });
+      
       const dashboardRoutes: Record<UserRole, string> = {
         client: '/dashboard/client',
         owner: '/dashboard/owner',
@@ -95,7 +141,12 @@ const Register: React.FC = () => {
       } as const;
       navigate(dashboardRoutes[formData.role as UserRole]);
     } catch (error) {
-      toast({ title: 'Error al crear la cuenta', description: 'No se pudo crear la cuenta. Intenta nuevamente.', variant: 'destructive' });
+      console.error('Error en registro:', error);
+      toast({ 
+        title: 'Error al crear la cuenta', 
+        description: error instanceof Error ? error.message : 'No se pudo crear la cuenta. Intenta nuevamente.', 
+        variant: 'destructive' 
+      });
     } finally {
       setIsLoading(false);
     }
@@ -117,25 +168,144 @@ const Register: React.FC = () => {
 
           <CardContent className="space-y-5 sm:space-y-6">
             <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6" noValidate>
-              {/* Nombre */}
+              {/* Nombres */}
               <div className="space-y-2">
-                <Label htmlFor="name" className="text-sm font-medium text-foreground">Nombre Completo</Label>
+                <Label htmlFor="nombres" className="text-sm font-medium text-foreground">Nombres</Label>
                 <div className="relative">
                   <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
-                    id="name"
+                    id="nombres"
                     type="text"
-                    placeholder="Tu nombre completo"
-                    value={formData.name}
-                    onChange={(e) => handleChange('name', e.target.value)}
-                    onBlur={() => setTouched((t) => ({ ...t, name: true }))}
+                    placeholder="Tus nombres"
+                    value={formData.nombres}
+                    onChange={(e) => handleChange('nombres', e.target.value)}
+                    onBlur={() => setTouched((t) => ({ ...t, nombres: true }))}
                     className="h-11 sm:h-12 pl-12 rounded-xl border-border bg-background text-foreground placeholder:text-muted-foreground/70 focus-visible:ring-2 focus-visible:ring-primary focus-visible:border-transparent"
                     required
-                    aria-invalid={touched.name && !!errors.name}
-                    aria-describedby={touched.name && errors.name ? 'name-err' : undefined}
+                    aria-invalid={touched.nombres && !!errors.nombres}
+                    aria-describedby={touched.nombres && errors.nombres ? 'nombres-err' : undefined}
                   />
                 </div>
-                {touched.name && errors.name && <p id="name-err" className="text-xs text-destructive">{errors.name}</p>}
+                {touched.nombres && errors.nombres && <p id="nombres-err" className="text-xs text-destructive">{errors.nombres}</p>}
+              </div>
+
+              {/* Apellidos */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="paterno" className="text-sm font-medium text-foreground">Apellido Paterno</Label>
+                  <Input
+                    id="paterno"
+                    type="text"
+                    placeholder="Apellido paterno"
+                    value={formData.paterno}
+                    onChange={(e) => handleChange('paterno', e.target.value)}
+                    onBlur={() => setTouched((t) => ({ ...t, paterno: true }))}
+                    className="h-11 sm:h-12 rounded-xl border-border bg-background text-foreground placeholder:text-muted-foreground/70 focus-visible:ring-2 focus-visible:ring-primary focus-visible:border-transparent"
+                    required
+                    aria-invalid={touched.paterno && !!errors.paterno}
+                    aria-describedby={touched.paterno && errors.paterno ? 'paterno-err' : undefined}
+                  />
+                  {touched.paterno && errors.paterno && <p id="paterno-err" className="text-xs text-destructive">{errors.paterno}</p>}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="materno" className="text-sm font-medium text-foreground">Apellido Materno</Label>
+                  <Input
+                    id="materno"
+                    type="text"
+                    placeholder="Apellido materno"
+                    value={formData.materno}
+                    onChange={(e) => handleChange('materno', e.target.value)}
+                    onBlur={() => setTouched((t) => ({ ...t, materno: true }))}
+                    className="h-11 sm:h-12 rounded-xl border-border bg-background text-foreground placeholder:text-muted-foreground/70 focus-visible:ring-2 focus-visible:ring-primary focus-visible:border-transparent"
+                    required
+                    aria-invalid={touched.materno && !!errors.materno}
+                    aria-describedby={touched.materno && errors.materno ? 'materno-err' : undefined}
+                  />
+                  {touched.materno && errors.materno && <p id="materno-err" className="text-xs text-destructive">{errors.materno}</p>}
+                </div>
+              </div>
+
+              {/* Documento */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="documentoTipo" className="text-sm font-medium text-foreground">Tipo de Documento</Label>
+                  <Select value={formData.documentoTipo} onValueChange={(value) => handleChange('documentoTipo', value)}>
+                    <SelectTrigger id="documentoTipo" className="h-11 sm:h-12 rounded-xl border-border bg-background">
+                      <SelectValue placeholder="Tipo de documento" />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-xl border-border">
+                      <SelectItem value="CC" className="rounded-lg">Cédula de Ciudadanía</SelectItem>
+                      <SelectItem value="DNI" className="rounded-lg">DNI</SelectItem>
+                      <SelectItem value="PASAPORTE" className="rounded-lg">Pasaporte</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="documentoNumero" className="text-sm font-medium text-foreground">Número de Documento</Label>
+                  <Input
+                    id="documentoNumero"
+                    type="text"
+                    placeholder="Número de documento"
+                    value={formData.documentoNumero}
+                    onChange={(e) => handleChange('documentoNumero', e.target.value)}
+                    onBlur={() => setTouched((t) => ({ ...t, documentoNumero: true }))}
+                    className="h-11 sm:h-12 rounded-xl border-border bg-background text-foreground placeholder:text-muted-foreground/70 focus-visible:ring-2 focus-visible:ring-primary focus-visible:border-transparent"
+                    required
+                    aria-invalid={touched.documentoNumero && !!errors.documentoNumero}
+                    aria-describedby={touched.documentoNumero && errors.documentoNumero ? 'documentoNumero-err' : undefined}
+                  />
+                  {touched.documentoNumero && errors.documentoNumero && <p id="documentoNumero-err" className="text-xs text-destructive">{errors.documentoNumero}</p>}
+                </div>
+              </div>
+
+              {/* Teléfono */}
+              <div className="space-y-2">
+                <Label htmlFor="telefono" className="text-sm font-medium text-foreground">Teléfono</Label>
+                <Input
+                  id="telefono"
+                  type="tel"
+                  placeholder="Tu número de teléfono"
+                  value={formData.telefono}
+                  onChange={(e) => handleChange('telefono', e.target.value)}
+                  onBlur={() => setTouched((t) => ({ ...t, telefono: true }))}
+                  className="h-11 sm:h-12 rounded-xl border-border bg-background text-foreground placeholder:text-muted-foreground/70 focus-visible:ring-2 focus-visible:ring-primary focus-visible:border-transparent"
+                  required
+                  aria-invalid={touched.telefono && !!errors.telefono}
+                  aria-describedby={touched.telefono && errors.telefono ? 'telefono-err' : undefined}
+                />
+                {touched.telefono && errors.telefono && <p id="telefono-err" className="text-xs text-destructive">{errors.telefono}</p>}
+              </div>
+
+              {/* Fecha de nacimiento y género */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="fechaNacimiento" className="text-sm font-medium text-foreground">Fecha de Nacimiento</Label>
+                  <Input
+                    id="fechaNacimiento"
+                    type="date"
+                    value={formData.fechaNacimiento}
+                    onChange={(e) => handleChange('fechaNacimiento', e.target.value)}
+                    onBlur={() => setTouched((t) => ({ ...t, fechaNacimiento: true }))}
+                    className="h-11 sm:h-12 rounded-xl border-border bg-background text-foreground placeholder:text-muted-foreground/70 focus-visible:ring-2 focus-visible:ring-primary focus-visible:border-transparent"
+                    required
+                    aria-invalid={touched.fechaNacimiento && !!errors.fechaNacimiento}
+                    aria-describedby={touched.fechaNacimiento && errors.fechaNacimiento ? 'fechaNacimiento-err' : undefined}
+                  />
+                  {touched.fechaNacimiento && errors.fechaNacimiento && <p id="fechaNacimiento-err" className="text-xs text-destructive">{errors.fechaNacimiento}</p>}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="genero" className="text-sm font-medium text-foreground">Género</Label>
+                  <Select value={formData.genero} onValueChange={(value) => handleChange('genero', value)}>
+                    <SelectTrigger id="genero" className="h-11 sm:h-12 rounded-xl border-border bg-background">
+                      <SelectValue placeholder="Seleccionar género" />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-xl border-border">
+                      <SelectItem value="MASCULINO" className="rounded-lg">Masculino</SelectItem>
+                      <SelectItem value="FEMENINO" className="rounded-lg">Femenino</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {touched.genero && errors.genero && <p className="text-xs text-destructive">{errors.genero}</p>}
+                </div>
               </div>
 
               {/* Rol */}
@@ -264,7 +434,7 @@ const Register: React.FC = () => {
                   <Link to="/privacy" className="text-primary hover:opacity-90 underline underline-offset-2"> Política de Privacidad</Link>.
                 </span>
               </label>
-              {touched.confirmPassword && errors.terms && <p className="text-xs text-destructive">{errors.terms}</p>}
+              {touched.role && errors.terms && <p className="text-xs text-destructive">{errors.terms}</p>}
 
               <Button
                 type="submit"

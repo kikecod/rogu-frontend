@@ -1,9 +1,7 @@
 import * as React from "react";
 import * as SliderPrimitive from "@radix-ui/react-slider";
 
-import { cn } from "import { cva } from "class-variance-authority";
-import type { VariantProps } from "class-variance-authority";
-/lib/utils";
+import { cn } from "../../lib/utils";
 
 const Slider = React.forwardRef<
   React.ElementRef<typeof SliderPrimitive.Root>,

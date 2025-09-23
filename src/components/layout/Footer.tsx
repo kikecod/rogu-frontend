@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Facebook, Instagram, Twitter } from 'lucide-react';
-
+import logoRogu from "../../assets/logo_rogu.png";
 export const Footer = () => {
   return (
     <footer
@@ -12,10 +12,13 @@ export const Footer = () => {
           {/* Brand */}
           <div className="col-span-1 md:col-span-2">
             <div className="flex items-center gap-3 mb-4">
-              {/* Caja logo: oscuro en claro, gradiente marca en dark */}
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center shadow-card-custom bg-gray-900 dark:bg-gradient-to-tr dark:from-[hsl(var(--primary-dark))] dark:to-[hsl(var(--primary))]">
-                <span className="text-white font-display font-bold text-lg">R</span>
-              </div>
+              {/* Logo de la marca */}
+              <img
+                src={logoRogu}
+                alt="Logo ROGÜ"
+                className="w-8 h-8 sm:w-10 sm:h-10 object-contain rounded-xl shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105 bg-white dark:bg-transparent"
+                draggable={false}
+              />
               <span className="font-display font-bold text-2xl text-foreground dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-r dark:from-[hsl(var(--primary))] dark:to-[hsl(var(--accent))]">
                 ROGÜ
               </span>
